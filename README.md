@@ -14,7 +14,7 @@ To register an Actor to the Actor system, you either extend one of the available
 
 # Step 1. add ActorLite to your Application's onCreate() method 
 
-In this step, you will cause any <b>Actvity</b> that implements the <b>Actor</b> interface will automatically register and unregister itself to the <b>ActorSystem</b>
+In this step, you will cause any <b>Actvity</b> that implements the <b>Actor</b> interface to automatically register and unregister itself to the <b>ActorSystem</b>
 
     @Override
     public void onCreate() {
