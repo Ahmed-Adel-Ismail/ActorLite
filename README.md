@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/Ahmed-Adel-Ismail/ActorLite.svg)](https://jitpack.io/#Ahmed-Adel-Ismail/ActorLite)
+
 # ActorLite
 A Light weight Actor Model library that helps communication between Android Components in a Message Driven manner
 
