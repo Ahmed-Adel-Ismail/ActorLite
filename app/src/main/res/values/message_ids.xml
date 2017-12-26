@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="message_id_print_fragment_log" type="id"/>
+    <item name="message_id_print_activity_log" type="id"/>
+    <item name="message_id_print_service_log" type="id"/>
+    <item name="message_id_print_application_log" type="id"/>
+
+</resources>
