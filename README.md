@@ -4,7 +4,7 @@
 A Light weight Actor Model library that helps communication between Android Components in a Message Driven manner
 
 # How It Works
-For every class that implements the <b>Actor</b> interface, it registers itself to the <b>ActorSystem</b>, which is responsible for delivering messages between the registered Actors through there address, the address of any Actor is the <b>Class</b> of it, for example the address of the <b>MainActivity<b> is <b>MainActivity.class</b>, and so on
+For every class that implements the <b>Actor</b> interface, it registers itself to the <b>ActorSystem</b>, which is responsible for delivering messages between the registered Actors through there address, the address of any Actor is the <b>Class</b> of it, for example the address of the <b>MainActivity</b> is <b>MainActivity.class</b>, and so on
 	
 You do not have to hold reference to Any Object any more, just send by the Object/Actor address and it will be received and executed on that Object's favorite thread ... you dont have to worry about multi-threading or references any more
 	
