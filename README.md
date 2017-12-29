@@ -27,7 +27,7 @@ For Activities, all you have to do is implement the Actor interface, like the fo
 
     public class MainActivity extends AppCompatActivity implements Actor {
 
-		public static final long MESSAGE_ID_DO_SOMETHING = 1938;
+		public static final int MESSAGE_ID_DO_SOMETHING = 1938;
 
 		...
 
@@ -57,7 +57,7 @@ For Fragments, you either need to extend the ActorFragment, or you will register
 
 	public class MainFragment extends ActorFragment {
 
-		public static final long MESSAGE_ID_DO_SOMETHING = 1236;
+		public static final int MESSAGE_ID_DO_SOMETHING = 1236;
 
 		...
 
@@ -88,7 +88,7 @@ For Services, you either need to extend the ActorService, or you will register i
 
 	public class MainService extends ActorService {
 
-		public static final long MESSAGE_ID_DO_SOMETHING = 1456;
+		public static final int MESSAGE_ID_DO_SOMETHING = 1456;
 
 		...
 
@@ -118,7 +118,7 @@ The Application class itself will be an Actor if it just implemented the <b>Acto
 
 	public class MainApp extends Application implements Actor {
 
-		public static final long MESSAGE_ID_DO_SOMETHING = 1626;
+		public static final int MESSAGE_ID_DO_SOMETHING = 1626;
 	
 		@Override
 		public void onCreate() {
@@ -267,5 +267,5 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.2'
+	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.3'
 	}

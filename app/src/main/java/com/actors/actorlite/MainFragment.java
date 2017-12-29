@@ -32,7 +32,7 @@ public class MainFragment extends ActorFragment {
         return AndroidSchedulers.mainThread();
     }
 
-    @Command(keyLong = R.id.message_id_print_fragment_log)
+    @Command(R.id.message_id_print_fragment_log)
     void onPrintLogMessage(String text) {
         Log.e("MainFragment", "Thread : " + Thread.currentThread().getId());
         Log.e("MainFragment", text);

@@ -24,7 +24,7 @@ public class ActorSystem {
      * @param messageId       the id of the {@link Message}
      * @param actorsAddresses the actor (or group of actors) that will receive this message
      */
-    public static void send(long messageId, @NonNull Class<?>... actorsAddresses) {
+    public static void send(int messageId, @NonNull Class<?>... actorsAddresses) {
         ActorSystemImpl.getInstance(null).send(messageId, actorsAddresses);
     }
 

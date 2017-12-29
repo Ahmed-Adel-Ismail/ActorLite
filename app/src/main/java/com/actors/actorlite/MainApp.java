@@ -43,7 +43,7 @@ public class MainApp extends Application implements Actor {
         return Schedulers.computation();
     }
 
-    @Command(keyLong = R.id.message_id_print_application_log)
+    @Command(R.id.message_id_print_application_log)
     void onPrintLogMessage(String text) {
         Log.e("MainApp", "Thread : " + Thread.currentThread().getId());
         Log.e("MainApp", text);

@@ -7,20 +7,20 @@ package com.actors;
  */
 public class Message {
 
-    private final long id;
+    private final int id;
     private final Object content;
 
-    public Message(long id) {
+    public Message(int id) {
         this(id, null);
 
     }
 
-    public Message(long id, Object content) {
+    public Message(int id, Object content) {
         this.id = id;
         this.content = content;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

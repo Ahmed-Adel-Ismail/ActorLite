@@ -43,7 +43,7 @@ public class Sender {
      * @param actorAddress the Actor class to receive the message
      * @return a {@link Cancellable} to cancel this {@link Message} if required
      */
-    public Cancellable send(long messageId, @NonNull final Class<?> actorAddress) {
+    public Cancellable send(int messageId, @NonNull final Class<?> actorAddress) {
         return send(new Message(messageId), actorAddress);
     }
 

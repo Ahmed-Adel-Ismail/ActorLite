@@ -54,7 +54,7 @@ class ActorSystemImpl {
      * @param messageId       the id of the {@link Message}
      * @param actorsAddresses the actor (or group of actorsAddresses) that will receive this message
      */
-    public void send(long messageId, @NonNull Class<?>... actorsAddresses) {
+    public void send(int messageId, @NonNull Class<?>... actorsAddresses) {
         send(new Message(messageId), actorsAddresses);
     }
 

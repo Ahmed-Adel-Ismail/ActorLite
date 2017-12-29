@@ -31,7 +31,7 @@ public class MainService extends ActorService {
         return Schedulers.computation();
     }
 
-    @Command(keyLong = R.id.message_id_print_service_log)
+    @Command(R.id.message_id_print_service_log)
     void onPrintLogMessage(String text) {
         Log.e("MainService", "Thread : " + Thread.currentThread().getId());
         Log.e("MainService", text);

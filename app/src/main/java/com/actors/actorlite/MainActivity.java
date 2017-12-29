@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements Actor {
         return AndroidSchedulers.mainThread();
     }
 
-    @Command(keyLong = R.id.message_id_print_activity_log)
+    @Command(R.id.message_id_print_activity_log)
     void onPrintLogMessage(String text) {
         Log.e("MainActivity", "Thread : " + Thread.currentThread().getId());
         Log.e("MainActivity", text);
