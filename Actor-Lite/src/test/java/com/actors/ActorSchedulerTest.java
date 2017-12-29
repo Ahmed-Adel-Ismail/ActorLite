@@ -61,7 +61,7 @@ public class ActorSchedulerTest {
             public Tuple<MockActor, Disposable> apply(@NonNull CountDownLatch countDownLatch) {
                 MockActorFour actor = new MockActorFour(countDownLatch);
                 actorSystem.register(actor);
-                Disposable d = ActorScheduler.after(10, actorSystem)
+                Disposable d = ActorScheduler.after(100, actorSystem)
                         .send(message, MockActorFour.class).cancel();
                 return Tuple.from(actor, d);
             }

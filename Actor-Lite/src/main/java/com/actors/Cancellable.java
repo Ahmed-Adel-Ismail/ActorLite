@@ -11,17 +11,17 @@ import io.reactivex.disposables.Disposable;
 public class Cancellable {
 
     private final Class<?> actorAddress;
-    private final long timestamp;
+    private final int id;
 
-    Cancellable(Class<?> actorAddress, long timestamp) {
-        this.timestamp = timestamp;
+    Cancellable(Class<?> actorAddress, int id) {
+        this.id = id;
         this.actorAddress = actorAddress;
     }
 
     public Disposable cancel() {
         synchronized (ActorScheduler.lock) {
             return ActorScheduler.getNonNullDisposableGroup(actorAddress)
-                    .remove(timestamp);
+                    .remove(id);
         }
     }
 

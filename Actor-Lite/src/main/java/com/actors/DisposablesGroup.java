@@ -1,19 +1,16 @@
 package com.actors;
 
-import android.support.annotation.NonNull;
-
 import java.util.HashMap;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 
 /**
+ * a group of {@link Disposable} instances
+ * <p>
  * Created by Ahmed Adel Ismail on 5/26/2017.
  */
-
-class DisposablesGroup extends HashMap<Long, Disposable>
-{
+class DisposablesGroup extends HashMap<Integer, Disposable> {
 
     /**
      * remove a {@link Disposable} if found, this method invokes {@link Disposable#dispose()}
@@ -33,18 +30,7 @@ class DisposablesGroup extends HashMap<Long, Disposable>
 
     @Override
     public void clear() {
-        Observable.fromIterable(keySet()).blockingForEach(remove());
+        Observable.fromIterable(keySet()).blockingForEach(this::remove);
         super.clear();
-    }
-
-    @NonNull
-    private Consumer<Long> remove() {
-        return new Consumer<Long>()
-        {
-            @Override
-            public void accept(@NonNull Long key) throws Exception {
-                remove(key);
-            }
-        };
     }
 }

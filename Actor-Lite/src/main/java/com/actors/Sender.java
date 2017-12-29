@@ -49,7 +49,7 @@ public class Sender {
 
     @NonNull
     private Cancellable doSend(Message message, Class<?> actorAddress) {
-        long id = message.getId();
+        int id = message.getId();
         DisposablesGroup disposables = ActorScheduler.getNonNullDisposableGroup(actorAddress);
         if (disposables.containsKey(id)) {
             return logDuplicateMessageAndReturnItsCancellable(actorAddress, id);
@@ -61,11 +61,11 @@ public class Sender {
 
     @NonNull
     private Cancellable logDuplicateMessageAndReturnItsCancellable(
-            Class<?> actorAddress, long id) {
+            Class<?> actorAddress, int id) {
         return new Cancellable(actorAddress, id);
     }
 
-    private Disposable sendAfterDelay(long id, Message message, Class<?> actorAddress) {
+    private Disposable sendAfterDelay(int id, Message message, Class<?> actorAddress) {
         return Single.just(message)
                 .delay(delayMillis, TimeUnit.MILLISECONDS)
                 .subscribe(sendFromActorSystemAndDispose(id, actorAddress));
@@ -73,7 +73,7 @@ public class Sender {
 
     @NonNull
     private Consumer<Message> sendFromActorSystemAndDispose(
-            final long id, final Class<?> actorAddress) {
+            final int id, final Class<?> actorAddress) {
         return message -> {
             synchronized (ActorScheduler.lock) {
                 doSendFromActorSystemAndDispose(message, actorAddress, id);
@@ -81,7 +81,7 @@ public class Sender {
         };
     }
 
-    private void doSendFromActorSystemAndDispose(Message message, Class<?> actorAddress, long id) {
+    private void doSendFromActorSystemAndDispose(Message message, Class<?> actorAddress, int id) {
         actorSystem.send(message, actorAddress);
         DisposablesGroup disposables = ActorScheduler.getNonNullDisposableGroup(actorAddress);
         disposables.remove(id);
