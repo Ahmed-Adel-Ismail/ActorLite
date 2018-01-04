@@ -268,5 +268,5 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.4'
+	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.5'
 	}
