@@ -19,7 +19,7 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        Chain.let(activity)
+        Chain.let(activity )
                 .when(act -> act instanceof AppCompatActivity)
                 .thenMap(act -> (AppCompatActivity) act)
                 .map(AppCompatActivity::getSupportFragmentManager)
@@ -52,7 +52,7 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
     @Override
     public void onActivityStopped(Activity activity) {
         if (activity instanceof Actor) {
-            ActorSystem.unregister(activity);
+            ActorSystem.postpone(activity);
         }
     }
 
@@ -63,8 +63,12 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        if (activity instanceof Actor && activity.isFinishing()) {
-            ActorScheduler.cancel(activity.getClass());
-        }
+        Chain.let(activity instanceof Actor)
+                .when(Boolean::booleanValue)
+                .thenTo(activity)
+                .apply(ActorSystem::unregister)
+                .when(Activity::isFinishing)
+                .thenMap(Activity::getClass)
+                .apply(ActorScheduler::cancel);
     }
 }

@@ -27,17 +27,18 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
         Chain.let(f)
                 .when(fragment -> fragment instanceof Actor)
                 .thenMap(fragment -> (Actor) fragment)
-                .apply(ActorSystem::unregister);
+                .apply(ActorSystem::postpone);
     }
 
     @Override
     public void onFragmentDestroyed(FragmentManager fm, Fragment f) {
-        Chain.let(f.getActivity())
-                .when(Activity::isFinishing)
+        Chain.let(f instanceof Actor)
+                .when(Boolean::booleanValue)
                 .thenTo(f)
-                .when(fragment -> fragment instanceof Actor)
+                .apply(ActorSystem::unregister)
+                .map(Fragment::getActivity)
+                .when(Activity::isFinishing)
                 .thenTo(f.getClass())
                 .apply(ActorScheduler::cancel);
-
     }
 }

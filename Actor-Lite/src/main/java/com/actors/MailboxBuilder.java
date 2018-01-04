@@ -1,6 +1,7 @@
 package com.actors;
 
 import android.os.Looper;
+import android.support.annotation.NonNull;
 
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -8,7 +9,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 
 /**
@@ -20,37 +21,25 @@ import io.reactivex.subjects.Subject;
  * should receive it's messages, there is {@link #observeOn(Scheduler)} or
  * {@link #observeOn(Looper)}
  * <p>
- * the default mailbox ehavior is a {@link PublishSubject}, you can change this
- * by invoking {@link #mailbox(Subject)}
- * <p>
  * Created by Ahmed Adel Ismail on 5/3/2017.
  */
 public class MailboxBuilder {
 
-    private Subject<Message> mailbox;
+    private ReplaySubject<Message> mailbox;
     private Scheduler actorScheduler;
     private Consumer<Message> onMessageReceived;
     private Action onMailboxClosed;
     private Consumer<Throwable> onMessageError;
     private Disposable actorDisposable;
 
-    MailboxBuilder(Object actor) {
+    MailboxBuilder(@NonNull ReplaySubject<Message> mailbox) {
+        this.mailbox = mailbox;
         this.actorScheduler = Schedulers.trampoline();
-        this.onMailboxClosed = () -> {};
+        this.onMailboxClosed = () -> {
+        };
         this.onMessageError = Throwable::printStackTrace;
     }
 
-
-    /**
-     * set the {@link Subject} that will operate as a Mailbox
-     *
-     * @param mailbox the {@link Subject} instance
-     * @return {@code this} instance for chaining
-     */
-    public MailboxBuilder mailbox(Subject<Message> mailbox) {
-        this.mailbox = mailbox;
-        return this;
-    }
 
     /**
      * set the {@link Scheduler} that will host the invocation of
@@ -119,17 +108,13 @@ public class MailboxBuilder {
             throw new UnsupportedOperationException("onMessageReceived() should be set");
         }
 
-        if (mailbox == null) {
-            mailbox = PublishSubject.create();
-        }
-
         actorDisposable = mailbox.observeOn(actorScheduler)
                 .subscribe(onMessageReceived, onMessageError, onMailboxClosed);
 
         return this;
     }
 
-    Subject<Message> getMailbox() {
+    ReplaySubject<Message> getMailbox() {
         return mailbox;
     }
 

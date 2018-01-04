@@ -198,9 +198,9 @@ public class ActorSchedulerTest {
     }
 
     @Test
-    public void attemptToSendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond() throws Exception {
+    public void sendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond() throws Exception {
         final ActorSystemImpl actorSystem = ActorSystemImpl
-                .getInstance("attemptToSendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond");
+                .getInstance("sendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond");
         MockActor actor = new TestAsync<MockActor>().apply(new Function<CountDownLatch, MockActor>() {
             @Override
             public MockActor apply(@NonNull CountDownLatch countDownLatch) {
@@ -218,10 +218,10 @@ public class ActorSchedulerTest {
     }
 
     @Test
-    public void attemptToSendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth() throws Exception {
+    public void sendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth() throws Exception {
 
         final ActorSystemImpl actorSystem = ActorSystemImpl
-                .getInstance("attemptToSendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth");
+                .getInstance("sendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth");
 
         final MockActorTen actor = new MockActorTen();
 
@@ -249,6 +249,25 @@ public class ActorSchedulerTest {
 
         actorSystem.unregister(MockActorTen.class);
         assertTrue(actor.message.getContent().equals(2));
+    }
+
+    @Test
+    public void sendMessageToPostponedActorThenReceiveItWhenTheActorRegisters() throws Exception {
+        final ActorSystemImpl actorSystem = ActorSystemImpl
+                .getInstance("sendMessageToPostponedActorThenReceiveItWhenTheActorRegisters");
+        MockActor actor = new TestAsync<MockActor>(50).apply(new Function<CountDownLatch, MockActor>() {
+            @Override
+            public MockActor apply(@NonNull CountDownLatch countDownLatch) {
+                Message message = new Message(1, 1);
+                MockActorNine actor = new MockActorNine(countDownLatch);
+                actorSystem.register(actor);
+                actorSystem.postpone(actor);
+                ActorScheduler.after(10, actorSystem).send(message, MockActorNine.class);
+                return actor;
+            }
+        });
+        actorSystem.register(actor);
+        assertTrue(actor.message.getContent().equals(1));
     }
 
 }

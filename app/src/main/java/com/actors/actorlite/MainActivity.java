@@ -29,6 +29,11 @@ public class MainActivity extends AppCompatActivity implements Actor {
                 .beginTransaction()
                 .add(new MainFragment(), "MAIN FRAGMENT")
                 .commit();
+
+        getFragmentManager()
+                .beginTransaction()
+                .add(new NonSupportFragment(),"NON SUPPORT FRAGMENT")
+                .commit();
     }
 
     @Override

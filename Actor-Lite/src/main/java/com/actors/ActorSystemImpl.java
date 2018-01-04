@@ -2,6 +2,9 @@ package com.actors;
 
 import android.support.annotation.NonNull;
 
+import com.chaining.Chain;
+import com.functional.curry.SwapCurry;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -9,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 
 /**
@@ -20,9 +24,9 @@ import io.reactivex.subjects.Subject;
 class ActorSystemImpl {
 
     private static final Map<Object, ActorSystemImpl> instances = new LinkedHashMap<>(1);
+    private static final int MAILBOX_CAPACITY = 10;
 
-
-    final TypedMap<Subject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<>());
+    final TypedMap<ReplaySubject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<>());
     final TypedMap<Disposable> actorsDisposables = new TypedMap<>(new LinkedHashMap<>());
     private final Object lock = new Object();
 
@@ -31,7 +35,7 @@ class ActorSystemImpl {
 
     }
 
-    public static ActorSystemImpl getInstance(Object key) {
+    static ActorSystemImpl getInstance(Object key) {
         synchronized (ActorSystemImpl.class) {
             return doGetInstance(key);
         }
@@ -106,23 +110,22 @@ class ActorSystemImpl {
             final Scheduler observeOn,
             final Consumer<Message> onMessageReceived) {
 
-        return mailboxBuilder -> mailboxBuilder.observeOn(observeOn)
+        return mailboxBuilder -> mailboxBuilder
+                .observeOn(observeOn)
                 .onMessageReceived(onMessageReceived);
     }
 
-    private void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilder) {
-
-        MailboxBuilder builder = new MailboxBuilder(actor);
-        try {
-            mailboxBuilder.accept(builder);
-        } catch (Throwable e) {
-            throw new RuntimeExceptionConverter().apply(e);
-        }
-
-        builder.build();
-        mailboxes.put(actor, builder.getMailbox());
-        actorsDisposables.put(actor, builder.getActorDisposable());
-        builder.clear();
+    private void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilderFunction) {
+        mailboxes.getOrIgnore(actor)
+                .defaultIfEmpty(ReplaySubject.create(MAILBOX_CAPACITY))
+                .map(Chain::let)
+                .blockingGet()
+                .map(MailboxBuilder::new)
+                .apply(mailboxBuilderFunction)
+                .map(MailboxBuilder::build)
+                .apply(builder -> mailboxes.put(actor, builder.getMailbox()))
+                .apply(builder -> actorsDisposables.put(actor, builder.getActorDisposable()))
+                .apply(MailboxBuilder::clear);
     }
 
     /**
@@ -137,6 +140,27 @@ class ActorSystemImpl {
      */
     public void register(@NonNull final Actor actor) {
         register(actor, defaultMailboxBuilder(actor.observeOnScheduler(), actor::onMessageReceived));
+    }
+
+    private void disposeIfNotDisposed(Disposable disposable) {
+        if (!disposable.isDisposed()) disposable.dispose();
+    }
+
+    /**
+     * postpone the current Actor, this means that this actor will either register again, or
+     * unregister itself in a later point ... this function will cause any coming message to be
+     * queued until the Actor Registers itself again, and then it will re-send the queued messages
+     * <p>
+     * if the Actor unregistered itself, the pending messages will be cancelled
+     *
+     * @param actor the Actor to be postponed
+     */
+    public void postpone(Object actor) {
+        synchronized (lock) {
+            Chain.let(actor)
+                    .apply(this::unregister)
+                    .apply(SwapCurry.toConsumer(mailboxes::put, ReplaySubject.create(MAILBOX_CAPACITY)));
+        }
     }
 
     /**
@@ -164,11 +188,8 @@ class ActorSystemImpl {
                 .doOnNext(mailbox -> mailboxes.remove(actor))
                 .flatMap(mailbox -> actorsDisposables.getOrIgnore(actor))
                 .doOnNext(disposable -> actorsDisposables.remove(actor))
+                .defaultIfEmpty(dummyDisposable())
                 .subscribe(this::disposeIfNotDisposed, Throwable::printStackTrace);
-    }
-
-    private void disposeIfNotDisposed(Disposable disposable) {
-        if (!disposable.isDisposed()) disposable.dispose();
     }
 
     private void doUnregisterObject(@NonNull Object actor) {
@@ -177,8 +198,23 @@ class ActorSystemImpl {
                 .doOnSuccess(mailbox -> mailboxes.remove(actor))
                 .flatMap(mailbox -> actorsDisposables.getOrIgnore(actor))
                 .doOnSuccess(disposable -> actorsDisposables.remove(actor))
+                .defaultIfEmpty(dummyDisposable())
                 .subscribe(this::disposeIfNotDisposed, Throwable::printStackTrace);
     }
 
+    @NonNull
+    private Disposable dummyDisposable() {
+        return new Disposable() {
+            @Override
+            public void dispose() {
+
+            }
+
+            @Override
+            public boolean isDisposed() {
+                return false;
+            }
+        };
+    }
 
 }

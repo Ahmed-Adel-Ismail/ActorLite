@@ -8,6 +8,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -153,6 +155,51 @@ public class ActorSystemTest {
         assertTrue(newActor.message.getId() == 1);
     }
 
+    @Test
+    public void postponeAndRegisterAgainThenReceivePostponedMessages() {
+        ActorSystemImpl actorSystem = ActorSystemImpl
+                .getInstance("postponeAndRegisterAgainThenReceivePostponedMessages");
+
+        Message message = new Message(1);
+        TestActor actor = new TestActor();
+        actorSystem.register(actor);
+        actorSystem.postpone(actor);
+        actorSystem.send(message,TestActor.class);
+        actorSystem.register(actor);
+
+        assertEquals(1, actor.message.getId());
+    }
+
+    @Test
+    public void postponeAndUnregisterThenDoNotReceiveMessage() {
+        ActorSystemImpl actorSystem = ActorSystemImpl
+                .getInstance("postponeAndUnregisterThenDropPostponedMessages");
+
+        Message message = new Message(1);
+        TestActor actor = new TestActor();
+        actorSystem.register(actor);
+        actorSystem.postpone(actor);
+        actorSystem.send(message,TestActor.class);
+        actorSystem.unregister(actor);
+
+        assertNull(actor.message);
+    }
+
+    @Test
+    public void postponeAndUnregisterAndRegisterThenDropPostponedMessage() {
+        ActorSystemImpl actorSystem = ActorSystemImpl
+                .getInstance("postponeAndUnregisterAndRegisterThenReceivePostponedMessages");
+
+        Message message = new Message(1);
+        TestActor actor = new TestActor();
+        actorSystem.register(actor);
+        actorSystem.postpone(actor);
+        actorSystem.send(message,TestActor.class);
+        actorSystem.unregister(actor);
+        actorSystem.register(actor);
+
+        assertNull(actor.message);
+    }
 
     private static class TestActor implements Actor {
 
@@ -163,7 +210,6 @@ public class ActorSystemTest {
             this.message = message;
         }
 
-        @android.support.annotation.NonNull
         @Override
         public Scheduler observeOnScheduler() {
             return Schedulers.trampoline();

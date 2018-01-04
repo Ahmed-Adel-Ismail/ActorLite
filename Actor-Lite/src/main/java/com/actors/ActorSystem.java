@@ -14,6 +14,8 @@ import io.reactivex.subjects.Subject;
 @SuppressWarnings("deprecation")
 public class ActorSystem {
 
+    private static final ActorSystemImpl implementation = ActorSystemImpl.getInstance(null);
+
     private ActorSystem() {
 
     }
@@ -25,7 +27,7 @@ public class ActorSystem {
      * @param actorsAddresses the actor (or group of actors) that will receive this message
      */
     public static void send(int messageId, @NonNull Class<?>... actorsAddresses) {
-        ActorSystemImpl.getInstance(null).send(messageId, actorsAddresses);
+        implementation.send(messageId, actorsAddresses);
     }
 
     /**
@@ -35,7 +37,7 @@ public class ActorSystem {
      * @param actorsAddresses the actor (or group of actors) that will receive this message
      */
     public static void send(final Message message, @NonNull Class<?>... actorsAddresses) {
-        ActorSystemImpl.getInstance(null).send(message, actorsAddresses);
+        implementation.send(message, actorsAddresses);
     }
 
 
@@ -50,7 +52,7 @@ public class ActorSystem {
     public static void register(@NonNull Object actor,
                                 @NonNull final Scheduler observeOn,
                                 @NonNull final Consumer<Message> onMessageReceived) {
-        ActorSystemImpl.getInstance(null).register(actor, observeOn, onMessageReceived);
+        implementation.register(actor, observeOn, onMessageReceived);
     }
 
 
@@ -63,7 +65,7 @@ public class ActorSystem {
      *              will be the address of it's mailbox
      */
     public static void register(@NonNull final Actor actor) {
-        ActorSystemImpl.getInstance(null).register(actor);
+        implementation.register(actor);
     }
 
     /**
@@ -73,7 +75,20 @@ public class ActorSystem {
      * @param mailboxBuilder a function that takes a {@link MailboxBuilder} and generates a Mailbox
      */
     public static void register(@NonNull Object actor, @NonNull Consumer<MailboxBuilder> mailboxBuilder) {
-        ActorSystemImpl.getInstance(null).register(actor, mailboxBuilder);
+        implementation.register(actor, mailboxBuilder);
+    }
+
+    /**
+     * postpone the current Actor, this means that this actor will either register again, or
+     * unregister itself in a later point ... this function will cause any coming message to be
+     * queued until the Actor Registers itself again, and then it will re-send the queued messages
+     * <p>
+     * if the Actor unregistered itself, the pending messages will be cancelled
+     *
+     * @param actor the Actor to be postponed
+     */
+    public static void postpone(@NonNull Object actor) {
+        implementation.postpone(actor);
     }
 
     /**
@@ -84,7 +99,7 @@ public class ActorSystem {
      * @param actor the Actor that was registered
      */
     public static void unregister(@NonNull Object actor) {
-        ActorSystemImpl.getInstance(null).unregister(actor);
+        implementation.unregister(actor);
     }
 
 

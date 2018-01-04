@@ -2,6 +2,7 @@
 <resources>
 
     <item name="message_id_print_fragment_log" type="id"/>
+    <item name="message_id_print_non_support_fragment_log" type="id"/>
     <item name="message_id_print_activity_log" type="id"/>
     <item name="message_id_print_service_log" type="id"/>
     <item name="message_id_print_application_log" type="id"/>
