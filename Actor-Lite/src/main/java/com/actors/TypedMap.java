@@ -34,7 +34,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * the same type passed
      */
     @NonNull
-    public Single<Boolean> containsKey(Class<?> type) {
+    Single<Boolean> containsKey(Class<?> type) {
         return Observable.fromIterable(map.keySet())
                 .map(new ObjectTypeRetriever())
                 .any(type::equals);
@@ -49,7 +49,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * the same type passed
      */
     @NonNull
-    public Single<Boolean> containsKey(Object key) {
+    Single<Boolean> containsKey(Object key) {
         return Single.just(map.containsKey(key));
     }
 
@@ -62,7 +62,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * empty {@link Maybe} if nothing is found
      */
     @NonNull
-    public Maybe<V> getOrIgnore(Object key) {
+    Maybe<V> getOrIgnore(Object key) {
         return get(key).toMaybe().onErrorComplete();
     }
 
@@ -76,7 +76,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * if no key was found, an error {@link Single} is returned holding {@link NoSuchElementException}
      */
     @NonNull
-    public Single<V> get(Object key) {
+    Single<V> get(Object key) {
         if (map.containsKey(key)) {
             return Single.just(map.get(key));
         } else if (key != null && map.containsKey(key.getClass())) {
@@ -95,7 +95,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * {@link NoSuchElementException} if no value was found
      */
     @NonNull
-    public Observable<V> get(@NonNull Class<?> type) {
+    Observable<V> get(@NonNull Class<?> type) {
         return getOrIgnore(type).switchIfEmpty(errorObservable(type));
 
     }
@@ -108,7 +108,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * @return a {@link Observable} emitting the stored values
      */
     @NonNull
-    public Observable<V> getOrIgnore(Class<?> type) {
+    Observable<V> getOrIgnore(Class<?> type) {
         return Observable.fromIterable(map.entrySet())
                 .filter(entry -> entry.getKey() != null)
                 .filter(entry -> new ObjectTypeValidator().test(type, entry.getKey()))
@@ -135,7 +135,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * @param value the value for this key
      */
     @NonNull
-    public TypedMap<V> put(Object key, V value) {
+    TypedMap<V> put(Object key, V value) {
         map.put(key, value);
         return this;
     }
@@ -146,7 +146,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * @param key the key to remove
      */
     @NonNull
-    public TypedMap<V> remove(Object key) {
+    TypedMap<V> remove(Object key) {
         map.remove(key);
         return this;
     }
@@ -155,7 +155,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * clear the current stored values
      */
     @NonNull
-    public TypedMap<V> clear() {
+    TypedMap<V> clear() {
         map.clear();
         return this;
     }
@@ -165,7 +165,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      *
      * @return the size
      */
-    public int size() {
+    int size() {
         return map.size();
     }
 
@@ -174,12 +174,13 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      *
      * @return {@code true} if there is nothing stored in this Object
      */
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return map.isEmpty();
     }
 
 
     @Override
+    @NonNull
     public Iterator<Entry<Object, V>> iterator() {
         return map.entrySet().iterator();
     }

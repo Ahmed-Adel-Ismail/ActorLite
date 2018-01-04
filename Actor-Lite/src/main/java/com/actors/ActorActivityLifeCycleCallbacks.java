@@ -3,6 +3,10 @@ package com.actors;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
+
+import com.chaining.Chain;
 
 /**
  * a class that registers {@link Actor} Activities and unregisters them based on the life-cycle
@@ -15,7 +19,15 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        Chain.let(activity)
+                .when(act -> act instanceof AppCompatActivity)
+                .thenMap(act -> (AppCompatActivity) act)
+                .map(AppCompatActivity::getSupportFragmentManager)
+                .apply(this::registerFragmentLifecycleCallback);
+    }
 
+    private void registerFragmentLifecycleCallback(FragmentManager manager) {
+        manager.registerFragmentLifecycleCallbacks(new ActorFragmentLifeCycleCallback(), false);
     }
 
     @Override
@@ -23,6 +35,8 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
         if (activity instanceof Actor) {
             ActorSystem.register((Actor) activity);
         }
+
+
     }
 
     @Override

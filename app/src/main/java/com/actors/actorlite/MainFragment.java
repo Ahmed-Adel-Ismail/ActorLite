@@ -1,9 +1,10 @@
 package com.actors.actorlite;
 
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
-import com.actors.ActorFragment;
+import com.actors.Actor;
 import com.actors.ActorSystem;
 import com.actors.Message;
 import com.annotations.Command;
@@ -17,7 +18,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Created by Ahmed Adel Ismail on 12/26/2017.
  */
 @CommandsMapFactory
-public class MainFragment extends ActorFragment {
+public class MainFragment extends Fragment implements Actor {
 
     private CommandsMap map = CommandsMap.of(this);
 
