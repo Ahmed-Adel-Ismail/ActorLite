@@ -27,13 +27,14 @@ public abstract class ActorFragment extends Fragment implements Actor {
     @CallSuper
     @Override
     public void onStop() {
-        ActorSystem.unregister(this);
+        ActorSystem.postpone(this);
         super.onStop();
     }
 
     @CallSuper
     @Override
     public void onDestroy() {
+        ActorSystem.unregister(this);
         if (getActivity() == null || getActivity().isFinishing()) {
             ActorScheduler.cancel(getClass());
         }

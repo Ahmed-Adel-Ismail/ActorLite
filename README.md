@@ -14,7 +14,7 @@ To register an Actor to the Actor system, you either extend one of the available
 
 # Step 1. add ActorLite to your Application's onCreate() method 
 
-In this step, you will cause any <b>Actvity</b> that implements the <b>Actor</b> interface to automatically register and unregister itself to the <b>ActorSystem</b>
+In this step, you will cause any <b>Actvity</b> and any <b>android.support.v4.app.Fragment</b> that implements the <b>Actor</b> interface to automatically register and unregister itself to the <b>ActorSystem</b>
 
     @Override
     public void onCreate() {
@@ -52,8 +52,8 @@ For Activities, all you have to do is implement the Actor interface, like the fo
 
 	}
 
-# Step 3. add Fragments as Actors
-For Fragments, you either need to extend the ActorFragment, or you will register it manually ... let us take the easy way first :
+# Step 3. add Fragments (non-support fragments) as Actors
+For non-support Fragments, you either need to extend the ActorFragment, or you will register it manually, remember that android.support.v4.app.Fragment that implements Actor interface is registered and unregistered by default for you ... let us take the easy way first :
 
 	public class MainFragment extends ActorFragment {
 
@@ -83,7 +83,7 @@ For Fragments, you either need to extend the ActorFragment, or you will register
 
 Nearly the same thing done in Activity is done in Fragment
 
-# Step 3. add Services as Actors
+# Step 4. add Services as Actors
 For Services, you either need to extend the ActorService, or you will register it manually ... let us take the easy way here too :
 
 	public class MainService extends ActorService {
@@ -113,7 +113,7 @@ For Services, you either need to extend the ActorService, or you will register i
 		}
 	}
 	
-# Step 4. add Application class as an Actor
+# Step 5. add Application class as an Actor
 The Application class itself will be an Actor if it just implemented the <b>Actor</b> interface, and you can send to it Messages as well as any other Actor, all you need to do is implement the <b>Actor</b> interface
 
 	public class MainApp extends Application implements Actor {
@@ -147,7 +147,7 @@ The Application class itself will be an Actor if it just implemented the <b>Acto
 		}
 	}
 
-# Step 5. add any Object as an Actor
+# Step 6. add any Object as an Actor
 For Any Object it should register and unregister itself manually from the <b>ActorSystem</b> and cancel all the pending Messages in the <b>ActorScheduler</b>, so for any Object that will be an Actor, it should have an initialization point, and a destruction point (similar to onCreate() and onDestroy() in the life-Cycle methods), so an example of an Actor Object will be as follows :
 
 	public class ActorObject implements Actor {
@@ -194,7 +194,7 @@ If the <b>MainFragment</b> unregistered itself from <b>ActorSystem</b> before th
 # Setup android components as actors manually
 Remember that you do not need to setup Activities Manually in all cases, so If you choose to Register and Unregister The remaining Android components manually, here is what to be done in every type :
 
-# Setup Fragments Manually
+# Setup Fragments (non-support Fragments) Manually
 
 	public class MyActorFragment extends Fragment implements Actor {
 
@@ -208,13 +208,14 @@ Remember that you do not need to setup Activities Manually in all cases, so If y
 		@CallSuper
 		@Override
 		public void onStop() {
-			ActorSystem.unregister(this);
+		    ActorSystem.postpone(this);
 			super.onStop();
 		}
 
 		@CallSuper
 		@Override
 		public void onDestroy() {
+		    ActorSystem.unregister(this);
 			if (getActivity() == null || getActivity().isFinishing()) {
 				ActorScheduler.cancel(getClass());
 			}
@@ -267,5 +268,5 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.3'
+	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.4'
 	}

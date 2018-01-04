@@ -26,7 +26,8 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
     public void onFragmentStopped(FragmentManager fm, Fragment f) {
         Chain.let(f)
                 .when(fragment -> fragment instanceof Actor)
-                .thenMap(fragment -> (Actor) fragment)
+                .thenMap(fragment -> (Actor) f
+                        ragment)
                 .apply(ActorSystem::postpone);
     }
 
