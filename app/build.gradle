@@ -34,5 +34,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 //    implementation project(':Actor-Lite')
-    implementation 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.6'
+    implementation 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.8'
 }
