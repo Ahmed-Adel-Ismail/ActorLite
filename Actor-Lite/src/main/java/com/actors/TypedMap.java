@@ -12,6 +12,8 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.Single;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 
 /**
  * the parent class for Typed Maps
@@ -34,10 +36,15 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * the same type passed
      */
     @NonNull
-    Single<Boolean> containsKey(Class<?> type) {
+    Single<Boolean> containsKey(final Class<?> type) {
         return Observable.fromIterable(map.keySet())
                 .map(new ObjectTypeRetriever())
-                .any(type::equals);
+                .any(new Predicate<Class<?>>() {
+                    @Override
+                    public boolean test(Class<?> aClass) throws Exception {
+                        return type.equals(aClass);
+                    }
+                });
 
     }
 
@@ -108,13 +115,12 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * @return a {@link Observable} emitting the stored values
      */
     @NonNull
-    Observable<V> getOrIgnore(Class<?> type) {
+    Observable<V> getOrIgnore(final Class<?> type) {
         return Observable.fromIterable(map.entrySet())
-                .filter(entry -> entry.getKey() != null)
-                .filter(entry -> new ObjectTypeValidator().test(type, entry.getKey()))
-                .map(Entry::getValue);
+                .filter(byNonNullKey())
+                .filter(byValidObjectTypes(type))
+                .map(toEntryValue());
     }
-
 
     @NonNull
     private Observable<V> errorObservable(@NonNull final Class<?> type) {
@@ -127,6 +133,35 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
         };
     }
 
+    @NonNull
+    private Predicate<Entry<Object, V>> byNonNullKey() {
+        return new Predicate<Entry<Object, V>>() {
+            @Override
+            public boolean test(Entry<Object, V> entry) throws Exception {
+                return entry.getKey() != null;
+            }
+        };
+    }
+
+    @NonNull
+    private Predicate<Entry<Object, V>> byValidObjectTypes(final Class<?> type) {
+        return new Predicate<Entry<Object, V>>() {
+            @Override
+            public boolean test(Entry<Object, V> entry) throws Exception {
+                return new ObjectTypeValidator().test(type, entry.getKey());
+            }
+        };
+    }
+
+    @NonNull
+    private Function<Entry<Object, V>, V> toEntryValue() {
+        return new Function<Entry<Object, V>, V>() {
+            @Override
+            public V apply(Entry<Object, V> entry) throws Exception {
+                return entry.getValue();
+            }
+        };
+    }
 
     /**
      * put an Object instance as a key, and an item as it's value

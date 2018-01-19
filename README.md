@@ -250,8 +250,6 @@ Remember that you do not need to setup Activities Manually in all cases, so If y
 
 To Avoid the big if/else blocks in onMessageReceived(), you can use <b>CommandsMap</b> instead ( https://github.com/Ahmed-Adel-Ismail/CommandsMap ), it is also used in the sample application in this repository
 
-Also this library targets Java 8, which is possible through using the new Gradle setup supported in Android Studio 3, or by using retrolambda in older versions
-
 # Gradle Dependencies
 
 Step 1. Add the JitPack repository to your build file
@@ -268,5 +266,5 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.8'
+	        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.9'
 	}

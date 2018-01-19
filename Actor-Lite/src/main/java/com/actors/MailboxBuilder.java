@@ -34,10 +34,29 @@ public class MailboxBuilder {
 
     MailboxBuilder(@NonNull ReplaySubject<Message> mailbox) {
         this.mailbox = mailbox;
-        this.actorScheduler = Schedulers.trampoline();
-        this.onMailboxClosed = () -> {
+        this.actorScheduler = Schedulers.computation();
+        this.onMailboxClosed = doNothing();
+        this.onMessageError = printStackTrace();
+    }
+
+    @NonNull
+    private Action doNothing() {
+        return new Action() {
+            @Override
+            public void run() throws Exception {
+
+            }
         };
-        this.onMessageError = Throwable::printStackTrace;
+    }
+
+    @NonNull
+    private Consumer<Throwable> printStackTrace() {
+        return new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                throwable.printStackTrace();
+            }
+        };
     }
 
 

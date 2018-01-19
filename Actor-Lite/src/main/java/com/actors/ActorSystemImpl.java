@@ -3,15 +3,16 @@ package com.actors;
 import android.support.annotation.NonNull;
 
 import com.chaining.Chain;
-import com.functional.curry.SwapCurry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 
@@ -26,8 +27,8 @@ class ActorSystemImpl {
     private static final Map<Object, ActorSystemImpl> instances = new LinkedHashMap<>(1);
     private static final int MAILBOX_CAPACITY = 10;
 
-    final TypedMap<ReplaySubject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<>());
-    final TypedMap<Disposable> actorsDisposables = new TypedMap<>(new LinkedHashMap<>());
+    final TypedMap<ReplaySubject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
+    final TypedMap<Disposable> actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
     private final Object lock = new Object();
 
 
@@ -73,10 +74,39 @@ class ActorSystemImpl {
             throw new UnsupportedOperationException("no Actors passed to the parameters");
         }
         Observable.fromArray(actorsAddresses)
-                .flatMap(mailboxes::getOrIgnore)
-                .blockingSubscribe(mailbox -> mailbox.onNext(message), Throwable::printStackTrace);
+                .flatMap(toMailboxMaybe())
+                .blockingSubscribe(invokeMailboxOnNext(message), printStackTrace());
     }
 
+    @NonNull
+    private Function<Class<?>, Observable<ReplaySubject<Message>>> toMailboxMaybe() {
+        return new Function<Class<?>, Observable<ReplaySubject<Message>>>() {
+            @Override
+            public Observable<ReplaySubject<Message>> apply(Class<?> aClass) throws Exception {
+                return mailboxes.getOrIgnore(aClass);
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<ReplaySubject<Message>> invokeMailboxOnNext(final Message message) {
+        return new Consumer<ReplaySubject<Message>>() {
+            @Override
+            public void accept(ReplaySubject<Message> mailbox) throws Exception {
+                mailbox.onNext(message);
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<Throwable> printStackTrace() {
+        return new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                throwable.printStackTrace();
+            }
+        };
+    }
 
     /**
      * register a class to a mailbox but with the default configurations
@@ -110,22 +140,85 @@ class ActorSystemImpl {
             final Scheduler observeOn,
             final Consumer<Message> onMessageReceived) {
 
-        return mailboxBuilder -> mailboxBuilder
-                .observeOn(observeOn)
-                .onMessageReceived(onMessageReceived);
+        return new Consumer<MailboxBuilder>() {
+            @Override
+            public void accept(MailboxBuilder builder) {
+                builder.observeOn(observeOn).onMessageReceived(onMessageReceived);
+            }
+        };
     }
 
     private void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilderFunction) {
         mailboxes.getOrIgnore(actor)
-                .defaultIfEmpty(ReplaySubject.create(MAILBOX_CAPACITY))
-                .map(Chain::let)
+                .defaultIfEmpty(ReplaySubject.<Message>create(MAILBOX_CAPACITY))
+                .map(toChain())
                 .blockingGet()
-                .map(MailboxBuilder::new)
+                .map(toMailboxBuilder())
                 .apply(mailboxBuilderFunction)
-                .map(MailboxBuilder::build)
-                .apply(builder -> mailboxes.put(actor, builder.getMailbox()))
-                .apply(builder -> actorsDisposables.put(actor, builder.getActorDisposable()))
-                .apply(MailboxBuilder::clear);
+                .map(toFinalMailboxBuilder())
+                .apply(addMailbox(actor))
+                .apply(addDisposable(actor))
+                .apply(clearMailboxBuilder());
+    }
+
+    @NonNull
+    private Function<ReplaySubject<Message>, Chain<ReplaySubject<Message>>> toChain() {
+        return new Function<ReplaySubject<Message>, Chain<ReplaySubject<Message>>>() {
+            @Override
+            public Chain<ReplaySubject<Message>> apply(ReplaySubject<Message> item) {
+                return Chain.let(item);
+            }
+        };
+    }
+
+    @NonNull
+    private Function<ReplaySubject<Message>, MailboxBuilder> toMailboxBuilder() {
+        return new Function<ReplaySubject<Message>, MailboxBuilder>() {
+            @Override
+            public MailboxBuilder apply(ReplaySubject<Message> mailbox) {
+                return new MailboxBuilder(mailbox);
+            }
+        };
+    }
+
+    @NonNull
+    private Function<MailboxBuilder, MailboxBuilder> toFinalMailboxBuilder() {
+        return new Function<MailboxBuilder, MailboxBuilder>() {
+            @Override
+            public MailboxBuilder apply(MailboxBuilder mailboxBuilder) {
+                return mailboxBuilder.build();
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<MailboxBuilder> addMailbox(final Object actor) {
+        return new Consumer<MailboxBuilder>() {
+            @Override
+            public void accept(MailboxBuilder builder) {
+                mailboxes.put(actor, builder.getMailbox());
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<MailboxBuilder> addDisposable(final Object actor) {
+        return new Consumer<MailboxBuilder>() {
+            @Override
+            public void accept(MailboxBuilder builder) {
+                actorsDisposables.put(actor, builder.getActorDisposable());
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<MailboxBuilder> clearMailboxBuilder() {
+        return new Consumer<MailboxBuilder>() {
+            @Override
+            public void accept(MailboxBuilder builder) {
+                builder.clear();
+            }
+        };
     }
 
     /**
@@ -139,11 +232,18 @@ class ActorSystemImpl {
      *              will be the address of it's mailbox
      */
     public void register(@NonNull final Actor actor) {
-        register(actor, defaultMailboxBuilder(actor.observeOnScheduler(), actor::onMessageReceived));
+        register(actor, defaultMailboxBuilder(actor.observeOnScheduler(),
+                invokeActorOnMessageReceived(actor)));
     }
 
-    private void disposeIfNotDisposed(Disposable disposable) {
-        if (!disposable.isDisposed()) disposable.dispose();
+    @NonNull
+    private Consumer<Message> invokeActorOnMessageReceived(@NonNull final Actor actor) {
+        return new Consumer<Message>() {
+            @Override
+            public void accept(Message message) throws Exception {
+                actor.onMessageReceived(message);
+            }
+        };
     }
 
     /**
@@ -158,9 +258,29 @@ class ActorSystemImpl {
     public void postpone(Object actor) {
         synchronized (lock) {
             Chain.let(actor)
-                    .apply(this::unregister)
-                    .apply(SwapCurry.toConsumer(mailboxes::put, ReplaySubject.create(MAILBOX_CAPACITY)));
+                    .apply(invokeUnregister())
+                    .apply(addNewMailbox());
         }
+    }
+
+    @NonNull
+    private Consumer<Object> invokeUnregister() {
+        return new Consumer<Object>() {
+            @Override
+            public void accept(Object o) throws Exception {
+                unregister(o);
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<Object> addNewMailbox() {
+        return new Consumer<Object>() {
+            @Override
+            public void accept(Object o) throws Exception {
+                mailboxes.put(o, ReplaySubject.<Message>create(MAILBOX_CAPACITY));
+            }
+        };
     }
 
     /**
@@ -172,34 +292,58 @@ class ActorSystemImpl {
      *              {@link #register(Object, Consumer)}
      */
     public void unregister(@NonNull Object actor) {
-        synchronized (lock) {
-            if (actor instanceof Class) {
-                doUnregisterClass((Class<?>) actor);
-            } else {
-                doUnregisterObject(actor);
+
+    }
+
+    private void doUnregisterClass(final Class<?> actor) {
+        mailboxes.getOrIgnore(actor)
+                .doOnNext(invokeMailboxOnComplete())
+                .doOnNext(removeMailboxByClass(actor))
+                .flatMap(toActorDisposableObservable(actor))
+                .doOnNext(removeDisposableByClass(actor))
+                .defaultIfEmpty(dummyDisposable())
+                .subscribe(invokeDisposeIfNotDisposed(), printStackTrace());
+    }
+
+    @NonNull
+    private Consumer<ReplaySubject<Message>> invokeMailboxOnComplete() {
+        return new Consumer<ReplaySubject<Message>>() {
+            @Override
+            public void accept(ReplaySubject<Message> mailbox) throws Exception {
+                mailbox.onComplete();
             }
-
-        }
+        };
     }
 
-    private void doUnregisterClass(Class<?> actor) {
-        mailboxes.getOrIgnore(actor)
-                .doOnNext(Subject::onComplete)
-                .doOnNext(mailbox -> mailboxes.remove(actor))
-                .flatMap(mailbox -> actorsDisposables.getOrIgnore(actor))
-                .doOnNext(disposable -> actorsDisposables.remove(actor))
-                .defaultIfEmpty(dummyDisposable())
-                .subscribe(this::disposeIfNotDisposed, Throwable::printStackTrace);
+    @NonNull
+    private Consumer<ReplaySubject<Message>> removeMailboxByClass(final Class<?> actor) {
+        return new Consumer<ReplaySubject<Message>>() {
+            @Override
+            public void accept(ReplaySubject<Message> mailbox) {
+                mailboxes.remove(actor);
+            }
+        };
     }
 
-    private void doUnregisterObject(@NonNull Object actor) {
-        mailboxes.getOrIgnore(actor)
-                .doOnSuccess(Subject::onComplete)
-                .doOnSuccess(mailbox -> mailboxes.remove(actor))
-                .flatMap(mailbox -> actorsDisposables.getOrIgnore(actor))
-                .doOnSuccess(disposable -> actorsDisposables.remove(actor))
-                .defaultIfEmpty(dummyDisposable())
-                .subscribe(this::disposeIfNotDisposed, Throwable::printStackTrace);
+    @NonNull
+    private Function<ReplaySubject<Message>, Observable<Disposable>>
+    toActorDisposableObservable(final Class<?> actor) {
+        return new Function<ReplaySubject<Message>, Observable<Disposable>>() {
+            @Override
+            public Observable<Disposable> apply(ReplaySubject<Message> mailbox) {
+                return actorsDisposables.getOrIgnore(actor);
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<Disposable> removeDisposableByClass(final Class<?> actor) {
+        return new Consumer<Disposable>() {
+            @Override
+            public void accept(Disposable disposable) throws Exception {
+                actorsDisposables.remove(actor);
+            }
+        };
     }
 
     @NonNull
@@ -213,6 +357,61 @@ class ActorSystemImpl {
             @Override
             public boolean isDisposed() {
                 return false;
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<Disposable> invokeDisposeIfNotDisposed() {
+        return new Consumer<Disposable>() {
+            @Override
+            public void accept(Disposable disposable) throws Exception {
+                disposeIfNotDisposed(disposable);
+            }
+        };
+    }
+
+    private void disposeIfNotDisposed(Disposable disposable) {
+        if (!disposable.isDisposed()) disposable.dispose();
+    }
+
+    private void doUnregisterObject(final @NonNull Object actor) {
+        mailboxes.getOrIgnore(actor)
+                .doOnSuccess(invokeMailboxOnComplete())
+                .doOnSuccess(removeMailboxByObject(actor))
+                .flatMap(toActorDisposableMaybe(actor))
+                .doOnSuccess(removeDisposableByObject(actor))
+                .defaultIfEmpty(dummyDisposable())
+                .subscribe(invokeDisposeIfNotDisposed(), printStackTrace());
+    }
+
+    @NonNull
+    private Consumer<ReplaySubject<Message>> removeMailboxByObject(final Object actor) {
+        return new Consumer<ReplaySubject<Message>>() {
+            @Override
+            public void accept(ReplaySubject<Message> mailbox) {
+                mailboxes.remove(actor);
+            }
+        };
+    }
+
+    @NonNull
+    private Function<ReplaySubject<Message>, Maybe<Disposable>>
+    toActorDisposableMaybe(final Object actor) {
+        return new Function<ReplaySubject<Message>, Maybe<Disposable>>() {
+            @Override
+            public Maybe<Disposable> apply(ReplaySubject<Message> mailbox) {
+                return actorsDisposables.getOrIgnore(actor);
+            }
+        };
+    }
+
+    @NonNull
+    private Consumer<Disposable> removeDisposableByObject(final Object actor) {
+        return new Consumer<Disposable>() {
+            @Override
+            public void accept(Disposable disposable) throws Exception {
+                actorsDisposables.remove(actor);
             }
         };
     }

@@ -5,6 +5,10 @@ import android.support.annotation.NonNull;
 
 import com.chaining.Chain;
 
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+
 /**
  * a class that integrates the ActorLite library with the passed Application
  * <p>
@@ -12,15 +16,54 @@ import com.chaining.Chain;
  */
 public class ActorLite {
 
-    @SuppressWarnings("ConstantConditions")
-    public static void with(@NonNull Application application) {
+    public static void with(final @NonNull Application application) {
         Chain.let(new ActorActivityLifeCycleCallbacks())
-                .apply(application::registerActivityLifecycleCallbacks)
+                .apply(registerActivityLifeCycleCallbacks(application))
                 .to(application instanceof Actor)
-                .when(Boolean::booleanValue)
-                .thenMap(booleanValue -> (Actor) application)
-                .apply(ActorSystem::register);
+                .when(isTrue())
+                .thenMap(toActor(application))
+                .apply(registerToActorSystem());
     }
 
+    @NonNull
+    private static Consumer<ActorActivityLifeCycleCallbacks> registerActivityLifeCycleCallbacks(
+            @NonNull final Application application) {
+        return new Consumer<ActorActivityLifeCycleCallbacks>() {
+            @Override
+            public void accept(ActorActivityLifeCycleCallbacks actorActivityLifeCycleCallbacks) {
+                application.registerActivityLifecycleCallbacks(actorActivityLifeCycleCallbacks);
+            }
+        };
+    }
+
+    @NonNull
+    private static Predicate<Boolean> isTrue() {
+        return new Predicate<Boolean>() {
+            @Override
+            public boolean test(Boolean aBoolean) throws Exception {
+                return aBoolean;
+            }
+        };
+    }
+
+    @NonNull
+    private static Function<Boolean, Actor> toActor(@NonNull final Application application) {
+        return new Function<Boolean, Actor>() {
+            @Override
+            public Actor apply(Boolean aBoolean) throws Exception {
+                return (Actor) application;
+            }
+        };
+    }
+
+    @NonNull
+    private static Consumer<Actor> registerToActorSystem() {
+        return new Consumer<Actor>() {
+            @Override
+            public void accept(Actor actor) throws Exception {
+                ActorSystem.register(actor);
+            }
+        };
+    }
 
 }

@@ -74,9 +74,12 @@ public class Sender {
     @NonNull
     private Consumer<Message> sendFromActorSystemAndDispose(
             final int id, final Class<?> actorAddress) {
-        return message -> {
-            synchronized (ActorScheduler.lock) {
-                doSendFromActorSystemAndDispose(message, actorAddress, id);
+        return new Consumer<Message>() {
+            @Override
+            public void accept(Message message) throws Exception {
+                synchronized (ActorScheduler.lock) {
+                    doSendFromActorSystemAndDispose(message, actorAddress, id);
+                }
             }
         };
     }
