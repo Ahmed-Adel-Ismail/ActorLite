@@ -59,7 +59,7 @@ public class ActorSchedulerTest {
         Tuple<MockActor, Disposable> tuple = new TestAsync<Tuple<MockActor, Disposable>>(1000).apply(new Function<CountDownLatch, Tuple<MockActor, Disposable>>() {
             @Override
             public Tuple<MockActor, Disposable> apply(@NonNull CountDownLatch countDownLatch) {
-                MockActorFour actor = new MockActorFour(countDownLatch);
+                MockActor actor = new MockActorFour(countDownLatch);
                 actorSystem.register(actor);
                 Disposable d = ActorScheduler.after(100, actorSystem)
                         .send(message, MockActorFour.class).cancel();
@@ -74,15 +74,15 @@ public class ActorSchedulerTest {
     public void cancelScheduledMessageToUnRegisteredActorSuccessfully() throws Exception {
         final ActorSystemImpl actorSystem = ActorSystemImpl
                 .getInstance("cancelScheduledMessageToUnRegisteredActorSuccessfully");
-        Property<Tuple<MockActor, Cancellable>> tuple = new Property<>();
+        final Property<Tuple<MockActorFive, Cancellable>> tuple = new Property<>();
 
         new TestAsync<Void>(1000).apply(new Function<CountDownLatch, Void>() {
             @Override
             public Void apply(@NonNull CountDownLatch countDownLatch) throws Exception {
                 MockActorFive actor = new MockActorFive(countDownLatch);
                 actorSystem.register(actor);
-                Cancellable c = ActorScheduler.after(100, actorSystem).send(message, MockActorFive.class);
-                actorSystem.unregister(MockActorFive.class);
+                Cancellable c = ActorScheduler.after(500, actorSystem).send(message, MockActorFive.class);
+                actorSystem.unregister(actor);
                 tuple.set(Tuple.from(actor, c));
                 return null;
             }
@@ -99,7 +99,7 @@ public class ActorSchedulerTest {
         Tuple<MockActor, Cancellable> tuple = new TestAsync<Tuple<MockActor, Cancellable>>().apply(new Function<CountDownLatch, Tuple<MockActor, Cancellable>>() {
             @Override
             public Tuple<MockActor, Cancellable> apply(@NonNull CountDownLatch countDownLatch) throws Exception {
-                MockActorSix actor = new MockActorSix(countDownLatch);
+                MockActor actor = new MockActorSix(countDownLatch);
                 actorSystem.register(actor);
                 Cancellable c = ActorScheduler.after(10, actorSystem)
                         .send(message, MockActorSix.class);

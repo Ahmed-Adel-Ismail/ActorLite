@@ -292,7 +292,14 @@ class ActorSystemImpl {
      *              {@link #register(Object, Consumer)}
      */
     public void unregister(@NonNull Object actor) {
+        synchronized (lock) {
+            if (actor instanceof Class) {
+                doUnregisterClass((Class<?>) actor);
+            } else {
+                doUnregisterObject(actor);
+            }
 
+        }
     }
 
     private void doUnregisterClass(final Class<?> actor) {
