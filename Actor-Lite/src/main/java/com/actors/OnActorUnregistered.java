@@ -5,7 +5,7 @@ package com.actors;
  * <p>
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
-public interface ClearableActor extends Actor {
+public interface OnActorUnregistered extends Actor {
 
     /**
      * a function that is invoked when this {@link Actor} is unregistered

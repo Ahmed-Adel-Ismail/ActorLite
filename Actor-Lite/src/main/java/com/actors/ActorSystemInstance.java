@@ -154,8 +154,8 @@ public class ActorSystemInstance {
             @Override
             public void accept(MailboxBuilder builder) {
                 builder.observeOn(observeOn).onMessageReceived(onMessageReceived);
-                if (actor instanceof ClearableActor) {
-                    builder.onMailboxClosed(invokeOnUnregister((ClearableActor) actor));
+                if (actor instanceof OnActorUnregistered) {
+                    builder.onMailboxClosed(invokeOnUnregister((OnActorUnregistered) actor));
                 }
             }
         };
@@ -177,7 +177,7 @@ public class ActorSystemInstance {
     }
 
     @NonNull
-    private static Action invokeOnUnregister(final ClearableActor actor) {
+    private static Action invokeOnUnregister(final OnActorUnregistered actor) {
         return new Action() {
             @Override
             public void run() throws Exception {

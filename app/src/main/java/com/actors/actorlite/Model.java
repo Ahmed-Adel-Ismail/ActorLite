@@ -6,8 +6,8 @@ import android.util.Log;
 
 import com.actors.Actor;
 import com.actors.ActorSystem;
-import com.actors.ClearableActor;
 import com.actors.Message;
+import com.actors.OnActorUnregistered;
 import com.actors.annotations.Spawn;
 
 import io.reactivex.Scheduler;
@@ -17,7 +17,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
 @Spawn(Repository.class)
-public class Model extends ViewModel implements ClearableActor {
+public class Model extends ViewModel implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 

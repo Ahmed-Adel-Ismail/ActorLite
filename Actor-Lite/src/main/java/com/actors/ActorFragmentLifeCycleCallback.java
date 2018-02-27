@@ -26,7 +26,7 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
 
     @Override
     public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
-        if (ON_CREATE == configuration.fragmentRegistration) {
+        if (ON_CREATE == configuration.registerActors) {
             registerActor(f);
         }
     }
@@ -39,14 +39,14 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
 
     @Override
     public void onFragmentStarted(FragmentManager fm, Fragment f) {
-        if (ON_START == configuration.fragmentRegistration) {
+        if (ON_START == configuration.registerActors) {
             registerActor(f);
         }
     }
 
     @Override
     public void onFragmentResumed(FragmentManager fm, Fragment f) {
-        if (ON_RESUME == configuration.fragmentRegistration) {
+        if (ON_RESUME == configuration.registerActors) {
             registerActor(f);
         }
     }
@@ -54,7 +54,7 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
 
     @Override
     public void onFragmentPaused(FragmentManager fm, Fragment f) {
-        if (ON_PAUSE == configuration.fragmentUnregistration) {
+        if (ON_PAUSE == configuration.unregisterActors) {
             unregisterActor(f);
         }
     }
@@ -68,7 +68,7 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
     @Override
     public void onFragmentStopped(FragmentManager fm, Fragment f) {
 
-        if (ON_STOP == configuration.fragmentUnregistration) {
+        if (ON_STOP == configuration.unregisterActors) {
             unregisterActor(f);
         }
 
@@ -77,8 +77,8 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
 
     private void postponeActorIfRequired(Fragment fragment) {
         if (fragment instanceof Actor
-                && !configuration.postponeMailboxDisabled
-                && ON_DESTROY == configuration.fragmentUnregistration) {
+                && configuration.postponeMailboxOnStop
+                && ON_DESTROY == configuration.unregisterActors) {
             ActorSystem.postpone(fragment);
         }
     }
@@ -86,7 +86,7 @@ class ActorFragmentLifeCycleCallback extends FragmentManager.FragmentLifecycleCa
     @Override
     public void onFragmentDestroyed(FragmentManager fm, Fragment f) {
 
-        if (ON_DESTROY == configuration.fragmentUnregistration) {
+        if (ON_DESTROY == configuration.unregisterActors) {
             unregisterActor(f);
         }
 

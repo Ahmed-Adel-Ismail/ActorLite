@@ -6,22 +6,17 @@ package com.actors;
 
 public class ActorSystemConfiguration {
 
+    final boolean postponeMailboxOnStop;
     @RegistrationStage
-    final int activitiesRegistration;
-    @RegistrationStage
-    final int fragmentRegistration;
+    final int registerActors;
     @UnregistrationStage
-    final int activitiesUnregistration;
-    @UnregistrationStage
-    final int fragmentUnregistration;
-    final boolean postponeMailboxDisabled;
+    final int unregisterActors;
+
 
     private ActorSystemConfiguration(Builder builder) {
-        activitiesRegistration = builder.activitiesRegistration;
-        fragmentRegistration = builder.fragmentRegistration;
-        activitiesUnregistration = builder.activitiesUnregistration;
-        fragmentUnregistration = builder.fragmentUnregistration;
-        postponeMailboxDisabled = builder.postponeMailboxDisabled;
+        registerActors = builder.registerActors;
+        unregisterActors = builder.unregisterActors;
+        postponeMailboxOnStop = builder.postponeMailboxOnStop;
     }
 
 
@@ -29,67 +24,44 @@ public class ActorSystemConfiguration {
      * {@code ActorSystemConfiguration} builder static inner class.
      */
     public static final class Builder {
-        private int activitiesRegistration = RegistrationStage.ON_START;
-        private int fragmentRegistration = RegistrationStage.ON_START;
-        private int activitiesUnregistration = UnregistrationStage.ON_STOP;
-        private int fragmentUnregistration = UnregistrationStage.ON_STOP;
-        private boolean postponeMailboxDisabled = false;
+        private int registerActors = RegistrationStage.ON_START;
+        private int unregisterActors = UnregistrationStage.ON_STOP;
+        private boolean postponeMailboxOnStop = true;
 
         public Builder() {
         }
 
         /**
-         * Sets the {@code activitiesRegistration} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code registerActors} and returns a reference to this Builder so that the methods can be chained together.
          *
-         * @param activitiesRegistration the {@code activitiesRegistration} to set
+         * @param registerActors the {@code registerActors} to set
          * @return a reference to this Builder
          */
-        public Builder activitiesRegistration(@RegistrationStage int activitiesRegistration) {
-            this.activitiesRegistration = activitiesRegistration;
+        public Builder registerActors(@RegistrationStage int registerActors) {
+            this.registerActors = registerActors;
             return this;
         }
 
         /**
-         * Sets the {@code fragmentRegistration} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code unregisterActors} and returns a reference to this Builder so that the methods can be chained together.
          *
-         * @param fragmentRegistration the {@code fragmentRegistration} to set
+         * @param unregisterActors the {@code unregisterActors} to set
          * @return a reference to this Builder
          */
-        public Builder fragmentRegistration(@RegistrationStage int fragmentRegistration) {
-            this.fragmentRegistration = fragmentRegistration;
+        public Builder unregisterActors(@UnregistrationStage int unregisterActors) {
+            this.unregisterActors = unregisterActors;
             return this;
         }
 
-        /**
-         * Sets the {@code activitiesUnregistration} and returns a reference to this Builder so that the methods can be chained together.
-         *
-         * @param activitiesUnregistration the {@code activitiesUnregistration} to set
-         * @return a reference to this Builder
-         */
-        public Builder activitiesUnregistration(@UnregistrationStage int activitiesUnregistration) {
-            this.activitiesUnregistration = activitiesUnregistration;
-            return this;
-        }
 
         /**
-         * Sets the {@code fragmentUnregistration} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code postponeMailboxOnStop} and returns a reference to this Builder so that the methods can be chained together.
          *
-         * @param fragmentUnregistration the {@code fragmentUnregistration} to set
+         * @param postponeMailboxOnStop the {@code postponeMailboxOnStop} to set
          * @return a reference to this Builder
          */
-        public Builder fragmentUnregistration(@UnregistrationStage int fragmentUnregistration) {
-            this.fragmentUnregistration = fragmentUnregistration;
-            return this;
-        }
-
-        /**
-         * Sets the {@code postponeMailboxDisabled} and returns a reference to this Builder so that the methods can be chained together.
-         *
-         * @param postponeMailboxDisabled the {@code postponeMailboxDisabled} to set
-         * @return a reference to this Builder
-         */
-        public Builder postponeMailboxDisabled(boolean postponeMailboxDisabled) {
-            this.postponeMailboxDisabled = postponeMailboxDisabled;
+        public Builder postponeMailboxOnStop(boolean postponeMailboxOnStop) {
+            this.postponeMailboxOnStop = postponeMailboxOnStop;
             return this;
         }
 

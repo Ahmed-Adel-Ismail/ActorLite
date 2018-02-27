@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.actors.Actor;
-import com.actors.ClearableActor;
 import com.actors.Message;
+import com.actors.OnActorUnregistered;
 
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
@@ -14,7 +14,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
 
-public class ServerGateway implements ClearableActor {
+public class ServerGateway implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 

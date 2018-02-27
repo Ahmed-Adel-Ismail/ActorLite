@@ -40,7 +40,7 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
         registerFragmentsCallbacks(activity);
 
-        if (ON_CREATE == configuration.activitiesRegistration) {
+        if (ON_CREATE == configuration.registerActors) {
             registerActor(activity);
         }
     }
@@ -106,21 +106,21 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityStarted(Activity activity) {
-        if (ON_START == configuration.activitiesRegistration) {
+        if (ON_START == configuration.registerActors) {
             registerActor(activity);
         }
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
-        if (ON_RESUME == configuration.activitiesRegistration) {
+        if (ON_RESUME == configuration.registerActors) {
             registerActor(activity);
         }
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-        if (ON_PAUSE == configuration.activitiesUnregistration) {
+        if (ON_PAUSE == configuration.unregisterActors) {
             unregisterActor(activity);
         }
 
@@ -135,7 +135,7 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityStopped(Activity activity) {
-        if (ON_STOP == configuration.activitiesUnregistration) {
+        if (ON_STOP == configuration.unregisterActors) {
             unregisterActor(activity);
         }
 
@@ -144,8 +144,8 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
 
     private void postponeActorIfRequired(Activity activity) {
         if (activity instanceof Actor
-                && !configuration.postponeMailboxDisabled
-                && ON_DESTROY == configuration.activitiesUnregistration) {
+                && configuration.postponeMailboxOnStop
+                && ON_DESTROY == configuration.unregisterActors) {
             ActorSystem.postpone(activity);
         }
     }
@@ -158,7 +158,7 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
     @Override
     public void onActivityDestroyed(Activity activity) {
 
-        if (ON_DESTROY == configuration.activitiesUnregistration) {
+        if (ON_DESTROY == configuration.unregisterActors) {
             unregisterActor(activity);
         }
 

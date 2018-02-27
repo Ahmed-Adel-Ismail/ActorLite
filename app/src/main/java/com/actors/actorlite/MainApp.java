@@ -36,11 +36,9 @@ public class MainApp extends Application implements Actor {
     @NonNull
     private ActorSystemConfiguration actorSystemConfiguration() {
         return new ActorSystemConfiguration.Builder()
-                .activitiesRegistration(RegistrationStage.ON_CREATE)
-                .activitiesUnregistration(UnregistrationStage.ON_DESTROY)
-                .fragmentRegistration(RegistrationStage.ON_CREATE)
-                .fragmentUnregistration(UnregistrationStage.ON_DESTROY)
-                .postponeMailboxDisabled(true)
+                .registerActors(RegistrationStage.ON_CREATE)
+                .unregisterActors(UnregistrationStage.ON_DESTROY)
+                .postponeMailboxOnStop(false)
                 .build();
     }
 

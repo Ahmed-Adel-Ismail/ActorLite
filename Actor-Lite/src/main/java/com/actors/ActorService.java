@@ -13,7 +13,7 @@ import android.support.annotation.Nullable;
  * <p>
  * Created by Ahmed Adel Ismail on 12/26/2017.
  */
-public abstract class ActorService extends Service implements ClearableActor {
+public abstract class ActorService extends Service implements Actor, OnActorUnregistered {
 
 
     @CallSuper

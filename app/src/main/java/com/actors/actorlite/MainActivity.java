@@ -1,6 +1,5 @@
 package com.actors.actorlite;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -11,18 +10,18 @@ import com.actors.ActorScheduler;
 import com.actors.ActorSystem;
 import com.actors.ClearableActor;
 import com.actors.Message;
+import com.actors.OnActorUnregistered;
 import com.actors.annotations.Spawn;
 import com.annotations.Command;
 import com.annotations.CommandsMapFactory;
-import com.chaining.Lazy;
 import com.mapper.CommandsMap;
 
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
-@Spawn({Model.class, Repository.class, ServerGateway.class, DatabaseGateway.class})
+@Spawn(Model.class)
 @CommandsMapFactory
-public class MainActivity extends AppCompatActivity implements ClearableActor {
+public class MainActivity extends AppCompatActivity implements Actor, OnActorUnregistered {
 
     private CommandsMap map = CommandsMap.of(this);
 
