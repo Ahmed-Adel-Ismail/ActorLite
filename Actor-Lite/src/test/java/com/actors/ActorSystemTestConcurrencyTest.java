@@ -24,7 +24,7 @@ public class ActorSystemTestConcurrencyTest {
 
     @Test
     public void sendMessageAndObserveOnDifferentThread() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageAndObserveOnDifferentThread");
         BooleanProperty differentThread = new TestAsync<BooleanProperty>().apply(new Function<CountDownLatch, BooleanProperty>() {
             @Override
@@ -55,7 +55,7 @@ public class ActorSystemTestConcurrencyTest {
     @Test
     public void sendMessageAndObserveOnSameThread() throws Exception {
 
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageAndObserveOnSameThread");
 
         final BooleanProperty result = new BooleanProperty(false);

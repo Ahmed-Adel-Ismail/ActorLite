@@ -14,9 +14,9 @@ import io.reactivex.functions.Consumer;
 public class Sender {
 
     private final long delayMillis;
-    private final ActorSystemImpl actorSystem;
+    private final ActorSystemInstance actorSystem;
 
-    Sender(long delayMillis, ActorSystemImpl actorSystem) {
+    Sender(long delayMillis, ActorSystemInstance actorSystem) {
         this.delayMillis = delayMillis;
         this.actorSystem = actorSystem;
     }

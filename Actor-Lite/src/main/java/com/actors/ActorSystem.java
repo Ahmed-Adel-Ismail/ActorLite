@@ -14,7 +14,7 @@ import io.reactivex.subjects.Subject;
 @SuppressWarnings("deprecation")
 public class ActorSystem {
 
-    private static final ActorSystemImpl implementation = ActorSystemImpl.getInstance(null);
+    private static final ActorSystemInstance implementation = ActorSystemInstance.getInstance(null);
 
     private ActorSystem() {
 
@@ -48,7 +48,9 @@ public class ActorSystem {
      * @param observeOn         the {@link Scheduler} that will host the received messages
      * @param onMessageReceived the {@link Consumer} function that will be invoked
      *                          when a message is received
+     * @deprecated use {@link #register(Actor)} instead
      */
+    @Deprecated
     public static void register(@NonNull Object actor,
                                 @NonNull final Scheduler observeOn,
                                 @NonNull final Consumer<Message> onMessageReceived) {
@@ -73,7 +75,9 @@ public class ActorSystem {
      *
      * @param actor          the class (Actor) that will handle messages
      * @param mailboxBuilder a function that takes a {@link MailboxBuilder} and generates a Mailbox
+     * @deprecated use {@link #register(Actor)} instead
      */
+    @Deprecated
     public static void register(@NonNull Object actor, @NonNull Consumer<MailboxBuilder> mailboxBuilder) {
         implementation.register(actor, mailboxBuilder);
     }

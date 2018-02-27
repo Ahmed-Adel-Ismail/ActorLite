@@ -20,7 +20,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void scheduleMessageToRegisteredActorAfterDelay() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("removeOldActorAfterRegisteringNewActorThenKeepNewActor");
         MockActor actor = new TestAsync<MockActor>().apply(new Function<CountDownLatch, MockActor>() {
             @Override
@@ -37,7 +37,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void scheduleMessageIdToRegisteredActorAfterDelay() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("scheduleMessageIdToRegisteredActorAfterDelay");
         MockActor actor = new TestAsync<MockActor>().apply(new Function<CountDownLatch, MockActor>() {
             @Override
@@ -54,7 +54,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void cancelScheduledMessageToRegisteredActorSuccessfully() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("cancelScheduledMessageToRegisteredActorSuccessfully");
         Tuple<MockActor, Disposable> tuple = new TestAsync<Tuple<MockActor, Disposable>>(1000).apply(new Function<CountDownLatch, Tuple<MockActor, Disposable>>() {
             @Override
@@ -72,7 +72,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void cancelScheduledMessageToUnRegisteredActorSuccessfully() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("cancelScheduledMessageToUnRegisteredActorSuccessfully");
         final Property<Tuple<MockActorFive, Cancellable>> tuple = new Property<>();
 
@@ -94,7 +94,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void cancelScheduledMessageAfterBeingReceivedAndDoNotCrash() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("cancelScheduledMessageAfterBeingReceivedAndDoNotCrash");
         Tuple<MockActor, Cancellable> tuple = new TestAsync<Tuple<MockActor, Cancellable>>().apply(new Function<CountDownLatch, Tuple<MockActor, Cancellable>>() {
             @Override
@@ -113,7 +113,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void cancelAllScheduledMessagesAndDisposablesForActorAfterSendingMessage() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("cancelAllScheduledMessagesAndDisposablesForActorAfterSendingMessage");
         MockActor actor = new TestAsync<MockActor>(1, TimeUnit.SECONDS).apply(new Function<CountDownLatch, MockActor>() {
             @Override
@@ -131,7 +131,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void cancelAllScheduledMessagesAndDisposablesForActorBeforeSendingMessage() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("cancelAllScheduledMessagesAndDisposablesForActorBeforeSendingMessage");
         MockActor actor = new TestAsync<MockActor>(1, TimeUnit.SECONDS).apply(new Function<CountDownLatch, MockActor>() {
             @Override
@@ -150,7 +150,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void disposeAllScheduledDisposablesAfterSendingMessageToRegisteredActor() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("disposeAllScheduledDisposablesAfterSendingMessageToRegisteredActor");
         new TestAsync<Void>().apply(new Function<CountDownLatch, Void>() {
             @Override
@@ -167,7 +167,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void scheduleMessageToRegisteredCrashingActorAndNotAffected() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("scheduleMessageToRegisteredCrashingActorAndNotAffected");
         new TestAsync<Void>().apply(new Function<CountDownLatch, Void>() {
             @Override
@@ -185,7 +185,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void scheduleMessageToNotRegisteredActorAndNotCrash() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("scheduleMessageToNotRegisteredActorAndNotCrash");
         new TestAsync<Void>(1, TimeUnit.SECONDS).apply(new Function<CountDownLatch, Void>() {
             @Override
@@ -199,7 +199,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void sendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendTheSameMessageTwiceBeforeTheFirstOneReceivedAndIgnoreTheSecond");
         MockActor actor = new TestAsync<MockActor>().apply(new Function<CountDownLatch, MockActor>() {
             @Override
@@ -220,7 +220,7 @@ public class ActorSchedulerTest {
     @Test
     public void sendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth() throws Exception {
 
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendTheSameMessageTwiceAfterTheFirstOneReceivedAndAcceptBoth");
 
         final MockActorTen actor = new MockActorTen();
@@ -253,7 +253,7 @@ public class ActorSchedulerTest {
 
     @Test
     public void sendMessageToPostponedActorThenReceiveItWhenTheActorRegisters() throws Exception {
-        final ActorSystemImpl actorSystem = ActorSystemImpl
+        final ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageToPostponedActorThenReceiveItWhenTheActorRegisters");
         MockActor actor = new TestAsync<MockActor>(50).apply(new Function<CountDownLatch, MockActor>() {
             @Override

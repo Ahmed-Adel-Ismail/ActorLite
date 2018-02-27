@@ -22,9 +22,9 @@ import io.reactivex.subjects.Subject;
  * <p>
  * Created by Ahmed Adel Ismail on 10/10/2017.
  */
-class ActorSystemImpl {
+public class ActorSystemInstance {
 
-    private static final Map<Object, ActorSystemImpl> instances = new LinkedHashMap<>(1);
+    private static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>(1);
     private static final int MAILBOX_CAPACITY = 10;
 
     final TypedMap<ReplaySubject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
@@ -32,21 +32,21 @@ class ActorSystemImpl {
     private final Object lock = new Object();
 
 
-    private ActorSystemImpl() {
+    private ActorSystemInstance() {
 
     }
 
-    static ActorSystemImpl getInstance(Object key) {
-        synchronized (ActorSystemImpl.class) {
+    public static ActorSystemInstance getInstance(Object key) {
+        synchronized (ActorSystemInstance.class) {
             return doGetInstance(key);
         }
     }
 
     @NonNull
-    private static ActorSystemImpl doGetInstance(Object key) {
-        ActorSystemImpl actorSystem = instances.get(key);
+    private static ActorSystemInstance doGetInstance(Object key) {
+        ActorSystemInstance actorSystem = instances.get(key);
         if (actorSystem == null) {
-            actorSystem = new ActorSystemImpl();
+            actorSystem = new ActorSystemInstance();
             instances.put(key, actorSystem);
         }
         return actorSystem;
@@ -115,7 +115,9 @@ class ActorSystemImpl {
      * @param observeOn         the {@link Scheduler} that will host the received messages
      * @param onMessageReceived the {@link Consumer} function that will be invoked
      *                          when a message is received
+     * @deprecated use {@link #register(Actor)} instead
      */
+    @Deprecated
     public void register(@NonNull Object actor,
                          @NonNull final Scheduler observeOn,
                          @NonNull final Consumer<Message> onMessageReceived) {
@@ -127,7 +129,9 @@ class ActorSystemImpl {
      *
      * @param actor          the class (Actor) that will handle messages
      * @param mailboxBuilder a function that takes a {@link MailboxBuilder} and generates a Mailbox
+     * @deprecated use {@link #register(Actor)} instead
      */
+    @Deprecated
     public void register(@NonNull Object actor,
                          @NonNull Consumer<MailboxBuilder> mailboxBuilder) {
         synchronized (lock) {

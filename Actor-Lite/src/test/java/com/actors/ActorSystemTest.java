@@ -20,7 +20,7 @@ public class ActorSystemTest {
 
     @Test
     public void registerActorAndDisposableThroughRegisterWithConsumer() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("registerActorAndDisposableThroughRegisterWithConsumer");
 
         final TestActor actor = new TestActor();
@@ -39,7 +39,7 @@ public class ActorSystemTest {
 
     @Test
     public void registerActorAndDisposableThroughRegisterWithActor() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("registerActorAndDisposableThroughRegisterWithActor");
 
         final TestActorTwo actor = new TestActorTwo();
@@ -53,7 +53,7 @@ public class ActorSystemTest {
 
     @Test
     public void unregisterAlreadyRegisteredActorAndDisposable() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("unregisterAlreadyRegisteredActorAndDisposable");
 
         final TestActor actor = new TestActor();
@@ -75,14 +75,14 @@ public class ActorSystemTest {
 
     @Test
     public void unregisterNonRegisteredActorAndDoNotCrash() throws Exception {
-        ActorSystemImpl
+        ActorSystemInstance
                 .getInstance("unregisterNonRegisteredActorAndDoNotCrash")
                 .unregister(TestActorFive.class);
     }
 
     @Test
     public void sendMessageAndReceiveItInActorsOnMessageReceivedConsumer() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageAndReceiveItInActorsOnMessageReceivedConsumer");
 
         final TestActor actor = new TestActor();
@@ -101,7 +101,7 @@ public class ActorSystemTest {
 
     @Test
     public void sendMessageIdAndReceiveItInActorsOnMessageReceivedConsumer() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageIdAndReceiveItInActorsOnMessageReceivedConsumer");
 
         final TestActor actor = new TestActor();
@@ -120,14 +120,14 @@ public class ActorSystemTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void sendMessageWithoutPassingActorClassesThenCrash() throws Exception {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageWithoutPassingActorClassesThenCrash");
         actorSystem.send(new Message(1));
     }
 
     @Test
     public void registerThenUnregisterActorThroughActorParameterMethodsSuccessfully() {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("registerThenUnregisterActorThroughActorParameterMethodsSuccessfully");
         TestActorThree actor = new TestActorThree();
         actorSystem.register(actor);
@@ -141,7 +141,7 @@ public class ActorSystemTest {
     @Test
     public void removeOldActorAfterRegisteringNewActorThenKeepNewActor() {
 
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("removeOldActorAfterRegisteringNewActorThenKeepNewActor");
 
         TestActorFour oldActor = new TestActorFour();
@@ -157,7 +157,7 @@ public class ActorSystemTest {
 
     @Test
     public void postponeAndRegisterAgainThenReceivePostponedMessages() {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("postponeAndRegisterAgainThenReceivePostponedMessages");
 
         Message message = new Message(1);
@@ -172,7 +172,7 @@ public class ActorSystemTest {
 
     @Test
     public void postponeAndUnregisterThenDoNotReceiveMessage() {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("postponeAndUnregisterThenDropPostponedMessages");
 
         Message message = new Message(1);
@@ -187,7 +187,7 @@ public class ActorSystemTest {
 
     @Test
     public void postponeAndUnregisterAndRegisterThenDropPostponedMessage() {
-        ActorSystemImpl actorSystem = ActorSystemImpl
+        ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("postponeAndUnregisterAndRegisterThenReceivePostponedMessages");
 
         Message message = new Message(1);
