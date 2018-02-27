@@ -9,6 +9,7 @@ public class Message {
 
     private final int id;
     private final Object content;
+    private final Class<?> replyToActor;
 
     public Message(int id) {
         this(id, null);
@@ -16,8 +17,13 @@ public class Message {
     }
 
     public Message(int id, Object content) {
+        this(id, content, null);
+    }
+
+    public Message(int id, Object content, Class<?> replyToActor) {
         this.id = id;
         this.content = content;
+        this.replyToActor = replyToActor;
     }
 
     public int getId() {
@@ -29,11 +35,16 @@ public class Message {
         return (T) content;
     }
 
+    public Class<?> getReplyToActor() {
+        return replyToActor;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
                 "id=" + id +
                 ", content=" + content +
+                ", replyToActor=" + replyToActor +
                 '}';
     }
 }

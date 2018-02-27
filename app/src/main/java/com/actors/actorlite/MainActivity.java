@@ -1,5 +1,6 @@
 package com.actors.actorlite;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -8,23 +9,29 @@ import android.util.Log;
 import com.actors.Actor;
 import com.actors.ActorScheduler;
 import com.actors.ActorSystem;
+import com.actors.ClearableActor;
 import com.actors.Message;
+import com.actors.annotations.Spawn;
 import com.annotations.Command;
 import com.annotations.CommandsMapFactory;
+import com.chaining.Lazy;
 import com.mapper.CommandsMap;
 
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
+@Spawn(Model.class)
 @CommandsMapFactory
-public class MainActivity extends AppCompatActivity implements Actor {
+public class MainActivity extends AppCompatActivity implements ClearableActor {
 
+    private final Lazy<Model> model = Lazy.defer(() -> ViewModelProviders.of(this).get(Model.class));
     private CommandsMap map = CommandsMap.of(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ActorSystem.register(model.call());
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(new MainFragment(), "MAIN FRAGMENT")
@@ -32,8 +39,10 @@ public class MainActivity extends AppCompatActivity implements Actor {
 
         getFragmentManager()
                 .beginTransaction()
-                .add(new NonSupportFragment(),"NON SUPPORT FRAGMENT")
+                .add(new NonSupportFragment(), "NON SUPPORT FRAGMENT")
                 .commit();
+
+
     }
 
     @Override
@@ -43,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements Actor {
     }
 
     private void sendMessages(String text) {
+
+        ActorSystem.send(new Message(Model.MSG_PING, text), Model.class);
+
         Message message = new Message(R.id.message_id_print_fragment_log, text);
         ActorSystem.send(message, MainFragment.class);
 
@@ -73,4 +85,16 @@ public class MainActivity extends AppCompatActivity implements Actor {
         Log.e("MainActivity", text);
     }
 
+    @Override
+    public void onUnregister() {
+        Log.w(getClass().getSimpleName(), "onCleared()");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isFinishing()) {
+            ActorSystem.unregister(model.call());
+        }
+    }
 }

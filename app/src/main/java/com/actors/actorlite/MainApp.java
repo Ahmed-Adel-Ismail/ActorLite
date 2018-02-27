@@ -27,7 +27,6 @@ public class MainApp extends Application implements Actor {
     public void onCreate() {
         super.onCreate();
         ActorLite.with(this);
-
         startService(new Intent(this, MainService.class));
     }
 

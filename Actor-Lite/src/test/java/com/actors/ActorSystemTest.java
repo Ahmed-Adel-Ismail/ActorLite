@@ -32,8 +32,8 @@ public class ActorSystemTest {
             }
         });
 
-        assertTrue(actorSystem.mailboxes.containsKey(TestActor.class).blockingGet()
-                && !actorSystem.actorsDisposables.get(TestActor.class).blockingFirst().isDisposed());
+        assertTrue(actorSystem.getMailboxes().containsKey(TestActor.class).blockingGet()
+                && !actorSystem.getActorsDisposables().get(TestActor.class).blockingFirst().isDisposed());
 
     }
 
@@ -46,8 +46,8 @@ public class ActorSystemTest {
 
         actorSystem.register(actor);
 
-        assertTrue(actorSystem.mailboxes.containsKey(TestActorTwo.class).blockingGet()
-                && !actorSystem.actorsDisposables.get(TestActorTwo.class).blockingFirst().isDisposed());
+        assertTrue(actorSystem.getMailboxes().containsKey(TestActorTwo.class).blockingGet()
+                && !actorSystem.getActorsDisposables().get(TestActorTwo.class).blockingFirst().isDisposed());
 
     }
 
@@ -64,11 +64,11 @@ public class ActorSystemTest {
             }
         });
 
-        Disposable disposable = actorSystem.actorsDisposables.get(TestActor.class).blockingFirst();
+        Disposable disposable = actorSystem.getActorsDisposables().get(TestActor.class).blockingFirst();
         actorSystem.unregister(TestActor.class);
 
-        assertTrue(!actorSystem.mailboxes.containsKey(TestActor.class).blockingGet()
-                && !actorSystem.actorsDisposables.containsKey(TestActor.class).blockingGet()
+        assertTrue(!actorSystem.getMailboxes().containsKey(TestActor.class).blockingGet()
+                && !actorSystem.getActorsDisposables().containsKey(TestActor.class).blockingGet()
                 && disposable.isDisposed());
 
     }
@@ -164,7 +164,7 @@ public class ActorSystemTest {
         TestActor actor = new TestActor();
         actorSystem.register(actor);
         actorSystem.postpone(actor);
-        actorSystem.send(message,TestActor.class);
+        actorSystem.send(message, TestActor.class);
         actorSystem.register(actor);
 
         assertEquals(1, actor.message.getId());
@@ -179,7 +179,7 @@ public class ActorSystemTest {
         TestActor actor = new TestActor();
         actorSystem.register(actor);
         actorSystem.postpone(actor);
-        actorSystem.send(message,TestActor.class);
+        actorSystem.send(message, TestActor.class);
         actorSystem.unregister(actor);
 
         assertNull(actor.message);
@@ -194,7 +194,7 @@ public class ActorSystemTest {
         TestActor actor = new TestActor();
         actorSystem.register(actor);
         actorSystem.postpone(actor);
-        actorSystem.send(message,TestActor.class);
+        actorSystem.send(message, TestActor.class);
         actorSystem.unregister(actor);
         actorSystem.register(actor);
 

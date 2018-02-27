@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.actors.Actor;
 import com.actors.ActorSystem;
+import com.actors.ClearableActor;
 import com.actors.Message;
 import com.annotations.Command;
 import com.annotations.CommandsMapFactory;
@@ -18,7 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Created by Ahmed Adel Ismail on 12/26/2017.
  */
 @CommandsMapFactory
-public class MainFragment extends Fragment implements Actor {
+public class MainFragment extends Fragment implements ClearableActor {
 
     private CommandsMap map = CommandsMap.of(this);
 
@@ -46,5 +47,10 @@ public class MainFragment extends Fragment implements Actor {
         message = new Message(R.id.message_id_print_activity_log, content);
         ActorSystem.send(message, MainActivity.class);
 
+    }
+
+    @Override
+    public void onUnregister() {
+        Log.w(getClass().getSimpleName(), "onCleared()");
     }
 }

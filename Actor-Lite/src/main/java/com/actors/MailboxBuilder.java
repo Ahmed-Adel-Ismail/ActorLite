@@ -128,7 +128,8 @@ public class MailboxBuilder {
         }
 
         actorDisposable = mailbox.observeOn(actorScheduler)
-                .subscribe(onMessageReceived, onMessageError, onMailboxClosed);
+                .doFinally(onMailboxClosed)
+                .subscribe(onMessageReceived, onMessageError, doNothing());
 
         return this;
     }

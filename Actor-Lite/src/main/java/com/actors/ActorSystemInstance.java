@@ -11,6 +11,7 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.ReplaySubject;
@@ -27,13 +28,17 @@ public class ActorSystemInstance {
     private static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>(1);
     private static final int MAILBOX_CAPACITY = 10;
 
-    final TypedMap<ReplaySubject<Message>> mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
-    final TypedMap<Disposable> actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
-    private final Object lock = new Object();
+    private final Object lock;
+    private final TypedMap<ReplaySubject<Message>> mailboxes;
+    private final TypedMap<Disposable> actorsDisposables;
+    private final ActorsInjector actorsInjector;
 
 
     private ActorSystemInstance() {
-
+        lock = new Object();
+        mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
+        actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
+        actorsInjector = new ActorsInjector(this);
     }
 
     public static ActorSystemInstance getInstance(Object key) {
@@ -121,7 +126,7 @@ public class ActorSystemInstance {
     public void register(@NonNull Object actor,
                          @NonNull final Scheduler observeOn,
                          @NonNull final Consumer<Message> onMessageReceived) {
-        register(actor, defaultMailboxBuilder(observeOn, onMessageReceived));
+        register(actor, defaultMailboxBuilder(actor, observeOn, onMessageReceived));
     }
 
     /**
@@ -141,6 +146,7 @@ public class ActorSystemInstance {
 
     @NonNull
     private static Consumer<MailboxBuilder> defaultMailboxBuilder(
+            final Object actor,
             final Scheduler observeOn,
             final Consumer<Message> onMessageReceived) {
 
@@ -148,6 +154,9 @@ public class ActorSystemInstance {
             @Override
             public void accept(MailboxBuilder builder) {
                 builder.observeOn(observeOn).onMessageReceived(onMessageReceived);
+                if (actor instanceof ClearableActor) {
+                    builder.onMailboxClosed(invokeOnUnregister((ClearableActor) actor));
+                }
             }
         };
     }
@@ -163,6 +172,18 @@ public class ActorSystemInstance {
                 .apply(addMailbox(actor))
                 .apply(addDisposable(actor))
                 .apply(clearMailboxBuilder());
+
+        actorsInjector.injectFor(actor);
+    }
+
+    @NonNull
+    private static Action invokeOnUnregister(final ClearableActor actor) {
+        return new Action() {
+            @Override
+            public void run() throws Exception {
+                actor.onUnregister();
+            }
+        };
     }
 
     @NonNull
@@ -236,7 +257,7 @@ public class ActorSystemInstance {
      *              will be the address of it's mailbox
      */
     public void register(@NonNull final Actor actor) {
-        register(actor, defaultMailboxBuilder(actor.observeOnScheduler(),
+        register(actor, defaultMailboxBuilder(actor, actor.observeOnScheduler(),
                 invokeActorOnMessageReceived(actor)));
     }
 
@@ -263,7 +284,7 @@ public class ActorSystemInstance {
         synchronized (lock) {
             Chain.let(actor)
                     .apply(invokeUnregister())
-                    .apply(addNewMailbox());
+                    .apply(addTemporaryMailbox());
         }
     }
 
@@ -278,7 +299,7 @@ public class ActorSystemInstance {
     }
 
     @NonNull
-    private Consumer<Object> addNewMailbox() {
+    private Consumer<Object> addTemporaryMailbox() {
         return new Consumer<Object>() {
             @Override
             public void accept(Object o) throws Exception {
@@ -307,13 +328,16 @@ public class ActorSystemInstance {
     }
 
     private void doUnregisterClass(final Class<?> actor) {
+        actorsInjector.clearFor(actor);
         mailboxes.getOrIgnore(actor)
                 .doOnNext(invokeMailboxOnComplete())
                 .doOnNext(removeMailboxByClass(actor))
                 .flatMap(toActorDisposableObservable(actor))
                 .doOnNext(removeDisposableByClass(actor))
                 .defaultIfEmpty(dummyDisposable())
-                .subscribe(invokeDisposeIfNotDisposed(), printStackTrace());
+                .blockingSubscribe(invokeDisposeIfNotDisposed(), printStackTrace());
+
+
     }
 
     @NonNull
@@ -387,6 +411,7 @@ public class ActorSystemInstance {
     }
 
     private void doUnregisterObject(final @NonNull Object actor) {
+        actorsInjector.clearFor(actor);
         mailboxes.getOrIgnore(actor)
                 .doOnSuccess(invokeMailboxOnComplete())
                 .doOnSuccess(removeMailboxByObject(actor))
@@ -394,7 +419,11 @@ public class ActorSystemInstance {
                 .doOnSuccess(removeDisposableByObject(actor))
                 .defaultIfEmpty(dummyDisposable())
                 .subscribe(invokeDisposeIfNotDisposed(), printStackTrace());
+
+
     }
+
+
 
     @NonNull
     private Consumer<ReplaySubject<Message>> removeMailboxByObject(final Object actor) {
@@ -427,4 +456,15 @@ public class ActorSystemInstance {
         };
     }
 
+    TypedMap<ReplaySubject<Message>> getMailboxes() {
+        return mailboxes;
+    }
+
+    TypedMap<Disposable> getActorsDisposables() {
+        return actorsDisposables;
+    }
+
+    ActorsInjector getActorsInjector() {
+        return actorsInjector;
+    }
 }
