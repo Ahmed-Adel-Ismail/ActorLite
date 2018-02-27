@@ -8,7 +8,6 @@ import android.util.Log;
 import com.actors.Actor;
 import com.actors.ActorScheduler;
 import com.actors.ActorSystem;
-import com.actors.ClearableActor;
 import com.actors.Message;
 import com.actors.OnActorUnregistered;
 import com.actors.annotations.Spawn;
