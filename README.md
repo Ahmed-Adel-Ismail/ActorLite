@@ -22,8 +22,8 @@ In this step, you will cause any <b>Actvity</b> and any <b>android.support.v4.ap
         ActorLite.with(this);
     }
 
-# Step 2. add Activities as Actors
-For Activities, all you have to do is implement the Actor interface, like the following :
+# Step 2. add Activities or Support Fragments as Actors
+For Activities and Support Fragments, all you have to do is implement the Actor interface, like the following :
 
     public class MainActivity extends AppCompatActivity implements Actor {
 
