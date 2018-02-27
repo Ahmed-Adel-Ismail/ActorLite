@@ -14,11 +14,11 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
 
-public class ServerGateway implements Actor, OnActorUnregistered {
+public class ServerDataSource implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 
-    public ServerGateway() {
+    public ServerDataSource() {
         Log.w(getClass().getSimpleName(), "initialized()");
     }
 

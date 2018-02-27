@@ -18,7 +18,7 @@ import com.mapper.CommandsMap;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
-@Spawn(Model.class)
+@Spawn({Model.class, Repository.class,ServerDataSource.class,DatabaseDataSource.class})
 @CommandsMapFactory
 public class MainActivity extends AppCompatActivity implements Actor, OnActorUnregistered {
 

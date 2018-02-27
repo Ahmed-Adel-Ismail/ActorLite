@@ -15,7 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
-@Spawn({ServerGateway.class, DatabaseGateway.class})
+@Spawn({ServerDataSource.class, DatabaseDataSource.class})
 public class Repository implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
@@ -29,8 +29,8 @@ public class Repository implements Actor, OnActorUnregistered {
         Log.e(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
         Log.e(getClass().getSimpleName(), message.getContent().toString());
 
-        ActorSystem.send(new Message(ServerGateway.MSG_PING,"message from repository"), ServerGateway.class);
-        ActorSystem.send(new Message(DatabaseGateway.MSG_PING,"message from repository"), DatabaseGateway.class);
+        ActorSystem.send(new Message(ServerDataSource.MSG_PING,"message from repository"), ServerDataSource.class);
+        ActorSystem.send(new Message(DatabaseDataSource.MSG_PING,"message from repository"), DatabaseDataSource.class);
     }
 
     @NonNull

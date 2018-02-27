@@ -39,7 +39,6 @@ public class MainApp extends Application implements Actor {
                 .registerActors(RegistrationStage.ON_CREATE)
                 .unregisterActors(UnregistrationStage.ON_DESTROY)
                 .postponeMailboxOnStop(false)
-                .spawnActors(false)
                 .build();
     }
 

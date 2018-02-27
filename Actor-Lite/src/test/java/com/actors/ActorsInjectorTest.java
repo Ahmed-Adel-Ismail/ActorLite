@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ActorsInjectorTest {
 
+
     private static final int MSG_ONE_ID = 1;
     private static final int MSG_TWO_ID = 2;
 
@@ -31,7 +32,7 @@ public class ActorsInjectorTest {
 
     @Test
     public void injectForActorThenSpawnAllActors() {
-        ActorSystemInstance system = ActorSystemInstance.getInstance("1");
+        ActorSystemInstance system = ActorSystemInstance.getInstance("1", configuration());
         system.register(new OwnerOne());
         system.send(MSG_ONE_ID, ActorOne.class);
         system.send(MSG_TWO_ID, ActorTwo.class);
@@ -43,9 +44,16 @@ public class ActorsInjectorTest {
 
     }
 
+    @NonNull
+    private ActorSystemConfiguration configuration() {
+        return new ActorSystemConfiguration.Builder()
+                .spawnActors(true)
+                .build();
+    }
+
     @Test
     public void injectForMultipleActorsThenSpawnTheSameInstance() {
-        ActorSystemInstance system = ActorSystemInstance.getInstance("2");
+        ActorSystemInstance system = ActorSystemInstance.getInstance("2", configuration());
 
         system.register(new OwnerOne());
         system.register(new OwnerTwo());
@@ -59,7 +67,7 @@ public class ActorsInjectorTest {
     @Test
     public void clearForActorThenUnregisterAllSpawnedActors() {
 
-        ActorSystemInstance system = ActorSystemInstance.getInstance("3");
+        ActorSystemInstance system = ActorSystemInstance.getInstance("3", configuration());
 
         OwnerOne owner = new OwnerOne();
         system.register(owner);
@@ -80,7 +88,7 @@ public class ActorsInjectorTest {
     @Test
     public void clearForMultipleActorsThenUnregisterSpawnedActorWhenTheOldestActorUnregisters() {
 
-        ActorSystemInstance system = ActorSystemInstance.getInstance("4");
+        ActorSystemInstance system = ActorSystemInstance.getInstance("4", configuration());
 
         OwnerTwo ownerTwo = new OwnerTwo();
         OwnerOne owner = new OwnerOne();
@@ -105,14 +113,13 @@ class Cache {
             return new Cache();
         }
     });
-
-    private Cache() {
-    }
-
     final TestScheduler testScheduler = new TestScheduler();
     final int[] actorOneInstancesCount = {0};
     final Message[] actorOneMessage = {null};
     final Message[] actorTwoMessage = {null};
+
+    private Cache() {
+    }
 
     void reset() {
         actorOneInstancesCount[0] = 0;

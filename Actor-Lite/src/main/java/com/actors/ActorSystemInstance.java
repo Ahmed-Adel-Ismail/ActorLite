@@ -1,6 +1,7 @@
 package com.actors;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 
 import com.chaining.Chain;
 
@@ -48,6 +49,7 @@ public class ActorSystemInstance {
 
     }
 
+    @RestrictTo(RestrictTo.Scope.TESTS)
     public static ActorSystemInstance getInstance(Object key, ActorSystemConfiguration configuration) {
         synchronized (ActorSystemInstance.class) {
             return doGetInstance(key, configuration);

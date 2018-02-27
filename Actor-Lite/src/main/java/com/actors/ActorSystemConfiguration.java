@@ -1,5 +1,7 @@
 package com.actors;
 
+import android.support.annotation.RestrictTo;
+
 /**
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
@@ -39,6 +41,7 @@ public class ActorSystemConfiguration {
          * @param spawnActors the {@code spawnActors} to set
          * @return a reference to this Builder
          */
+        @RestrictTo(RestrictTo.Scope.TESTS)
         public Builder spawnActors(boolean spawnActors) {
             this.spawnActors = spawnActors;
             return this;
