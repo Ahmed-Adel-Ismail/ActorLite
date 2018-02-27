@@ -20,18 +20,16 @@ import com.mapper.CommandsMap;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
-@Spawn(Model.class)
+@Spawn({Model.class, Repository.class, ServerGateway.class, DatabaseGateway.class})
 @CommandsMapFactory
 public class MainActivity extends AppCompatActivity implements ClearableActor {
 
-    private final Lazy<Model> model = Lazy.defer(() -> ViewModelProviders.of(this).get(Model.class));
     private CommandsMap map = CommandsMap.of(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ActorSystem.register(model.call());
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(new MainFragment(), "MAIN FRAGMENT")
@@ -93,8 +91,5 @@ public class MainActivity extends AppCompatActivity implements ClearableActor {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isFinishing()) {
-            ActorSystem.unregister(model.call());
-        }
     }
 }

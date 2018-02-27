@@ -7,7 +7,10 @@ import android.util.Log;
 
 import com.actors.Actor;
 import com.actors.ActorLite;
+import com.actors.ActorSystemConfiguration;
 import com.actors.Message;
+import com.actors.RegistrationStage;
+import com.actors.UnregistrationStage;
 import com.annotations.Command;
 import com.annotations.CommandsMapFactory;
 import com.mapper.CommandsMap;
@@ -26,8 +29,19 @@ public class MainApp extends Application implements Actor {
     @Override
     public void onCreate() {
         super.onCreate();
-        ActorLite.with(this);
+        ActorLite.with(this, actorSystemConfiguration());
         startService(new Intent(this, MainService.class));
+    }
+
+    @NonNull
+    private ActorSystemConfiguration actorSystemConfiguration() {
+        return new ActorSystemConfiguration.Builder()
+                .activitiesRegistration(RegistrationStage.ON_CREATE)
+                .activitiesUnregistration(UnregistrationStage.ON_DESTROY)
+                .fragmentRegistration(RegistrationStage.ON_CREATE)
+                .fragmentUnregistration(UnregistrationStage.ON_DESTROY)
+                .postponeMailboxDisabled(true)
+                .build();
     }
 
 

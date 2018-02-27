@@ -13,6 +13,13 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 
+import static com.actors.RegistrationStage.ON_CREATE;
+import static com.actors.RegistrationStage.ON_RESUME;
+import static com.actors.RegistrationStage.ON_START;
+import static com.actors.UnregistrationStage.ON_DESTROY;
+import static com.actors.UnregistrationStage.ON_PAUSE;
+import static com.actors.UnregistrationStage.ON_STOP;
+
 /**
  * a class that registers {@link Actor} Activities and unregisters them based on the life-cycle
  * events, which should be passed to
@@ -22,13 +29,34 @@ import io.reactivex.functions.Predicate;
  */
 class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCallbacks {
 
+    private final ActorSystemConfiguration configuration;
+
+    ActorActivityLifeCycleCallbacks(ActorSystemConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+        registerFragmentsCallbacks(activity);
+
+        if (ON_CREATE == configuration.activitiesRegistration) {
+            registerActor(activity);
+        }
+    }
+
+    private void registerFragmentsCallbacks(Activity activity) {
         Chain.let(activity)
                 .when(isAppCompatActivity())
                 .thenMap(toAppCompatActivity())
                 .map(toSupportFragmentManager())
                 .apply(invokeRegisterFragmentLifecycleCallback());
+    }
+
+    private void registerActor(Activity activity) {
+        if (activity instanceof Actor) {
+            ActorSystem.register((Actor) activity);
+        }
     }
 
     @NonNull
@@ -72,98 +100,73 @@ class ActorActivityLifeCycleCallbacks implements Application.ActivityLifecycleCa
     }
 
     private void registerFragmentLifecycleCallback(FragmentManager manager) {
-        manager.registerFragmentLifecycleCallbacks(new ActorFragmentLifeCycleCallback(), false);
+        manager.registerFragmentLifecycleCallbacks(
+                new ActorFragmentLifeCycleCallback(configuration), true);
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
-        if (activity instanceof Actor) {
-            ActorSystem.register((Actor) activity);
+        if (ON_START == configuration.activitiesRegistration) {
+            registerActor(activity);
         }
-
-
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
-
+        if (ON_RESUME == configuration.activitiesRegistration) {
+            registerActor(activity);
+        }
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
+        if (ON_PAUSE == configuration.activitiesUnregistration) {
+            unregisterActor(activity);
+        }
 
     }
 
+    private void unregisterActor(Activity activity) {
+        if (activity instanceof Actor) {
+            ActorSystem.unregister(activity);
+        }
+    }
+
+
     @Override
     public void onActivityStopped(Activity activity) {
-        if (activity instanceof Actor) {
+        if (ON_STOP == configuration.activitiesUnregistration) {
+            unregisterActor(activity);
+        }
+
+        postponeActorIfRequired(activity);
+    }
+
+    private void postponeActorIfRequired(Activity activity) {
+        if (activity instanceof Actor
+                && !configuration.postponeMailboxDisabled
+                && ON_DESTROY == configuration.activitiesUnregistration) {
             ActorSystem.postpone(activity);
         }
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
+        // do nothing
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        Chain.let(activity instanceof Actor)
-                .when(isTrue())
-                .thenTo(activity)
-                .apply(unregisterFromActorSystem())
-                .when(isActivityFinishing())
-                .thenMap(toActivityClass())
-                .apply(cancelScheduledMessages());
+
+        if (ON_DESTROY == configuration.activitiesUnregistration) {
+            unregisterActor(activity);
+        }
+
+
+        if (activity.isFinishing()) {
+            ActorScheduler.cancel(activity.getClass());
+        }
+
     }
 
-    @NonNull
-    private Predicate<Boolean> isTrue() {
-        return new Predicate<Boolean>() {
-            @Override
-            public boolean test(Boolean aBoolean) throws Exception {
-                return aBoolean;
-            }
-        };
-    }
-
-    @NonNull
-    private Consumer<Activity> unregisterFromActorSystem() {
-        return new Consumer<Activity>() {
-            @Override
-            public void accept(Activity activity) throws Exception {
-                ActorSystem.unregister(activity);
-            }
-        };
-    }
-
-    @NonNull
-    private Predicate<Activity> isActivityFinishing() {
-        return new Predicate<Activity>() {
-            @Override
-            public boolean test(Activity activity) throws Exception {
-                return activity.isFinishing();
-            }
-        };
-    }
-
-    @NonNull
-    private Function<Activity, Class<?>> toActivityClass() {
-        return new Function<Activity, Class<?>>() {
-            @Override
-            public Class<?> apply(Activity activity) throws Exception {
-                return activity.getClass();
-            }
-        };
-    }
-
-    @NonNull
-    private Consumer<Class<?>> cancelScheduledMessages() {
-        return new Consumer<Class<?>>() {
-            @Override
-            public void accept(Class<?> clazz) throws Exception {
-                ActorScheduler.cancel(clazz);
-            }
-        };
-    }
 }

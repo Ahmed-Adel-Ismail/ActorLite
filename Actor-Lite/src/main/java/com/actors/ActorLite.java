@@ -17,7 +17,12 @@ import io.reactivex.functions.Predicate;
 public class ActorLite {
 
     public static void with(final @NonNull Application application) {
-        Chain.let(new ActorActivityLifeCycleCallbacks())
+        ActorLite.with(application, new ActorSystemConfiguration.Builder().build());
+    }
+
+    public static void with(final @NonNull Application application,
+                            ActorSystemConfiguration configuration) {
+        Chain.let(new ActorActivityLifeCycleCallbacks(configuration))
                 .apply(registerActivityLifeCycleCallbacks(application))
                 .to(application instanceof Actor)
                 .when(isTrue())
