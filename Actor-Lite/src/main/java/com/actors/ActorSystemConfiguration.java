@@ -6,17 +6,18 @@ package com.actors;
 
 public class ActorSystemConfiguration {
 
+    final boolean spawnActors;
     final boolean postponeMailboxOnStop;
     @RegistrationStage
     final int registerActors;
     @UnregistrationStage
     final int unregisterActors;
 
-
     private ActorSystemConfiguration(Builder builder) {
+        spawnActors = builder.spawnActors;
+        postponeMailboxOnStop = builder.postponeMailboxOnStop;
         registerActors = builder.registerActors;
         unregisterActors = builder.unregisterActors;
-        postponeMailboxOnStop = builder.postponeMailboxOnStop;
     }
 
 
@@ -24,6 +25,7 @@ public class ActorSystemConfiguration {
      * {@code ActorSystemConfiguration} builder static inner class.
      */
     public static final class Builder {
+        private boolean spawnActors = true;
         private int registerActors = RegistrationStage.ON_START;
         private int unregisterActors = UnregistrationStage.ON_STOP;
         private boolean postponeMailboxOnStop = true;
@@ -32,12 +34,34 @@ public class ActorSystemConfiguration {
         }
 
         /**
+         * Sets the {@code spawnActors} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param spawnActors the {@code spawnActors} to set
+         * @return a reference to this Builder
+         */
+        public Builder spawnActors(boolean spawnActors) {
+            this.spawnActors = spawnActors;
+            return this;
+        }
+
+        /**
+         * Sets the {@code postponeMailboxOnStop} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param postponeMailboxOnStop the {@code postponeMailboxOnStop} to set
+         * @return a reference to this Builder
+         */
+        public Builder postponeMailboxOnStop(boolean postponeMailboxOnStop) {
+            this.postponeMailboxOnStop = postponeMailboxOnStop;
+            return this;
+        }
+
+        /**
          * Sets the {@code registerActors} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param registerActors the {@code registerActors} to set
          * @return a reference to this Builder
          */
-        public Builder registerActors(@RegistrationStage int registerActors) {
+        public Builder registerActors(int registerActors) {
             this.registerActors = registerActors;
             return this;
         }
@@ -48,20 +72,8 @@ public class ActorSystemConfiguration {
          * @param unregisterActors the {@code unregisterActors} to set
          * @return a reference to this Builder
          */
-        public Builder unregisterActors(@UnregistrationStage int unregisterActors) {
+        public Builder unregisterActors(int unregisterActors) {
             this.unregisterActors = unregisterActors;
-            return this;
-        }
-
-
-        /**
-         * Sets the {@code postponeMailboxOnStop} and returns a reference to this Builder so that the methods can be chained together.
-         *
-         * @param postponeMailboxOnStop the {@code postponeMailboxOnStop} to set
-         * @return a reference to this Builder
-         */
-        public Builder postponeMailboxOnStop(boolean postponeMailboxOnStop) {
-            this.postponeMailboxOnStop = postponeMailboxOnStop;
             return this;
         }
 

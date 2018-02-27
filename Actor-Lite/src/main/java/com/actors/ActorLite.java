@@ -20,55 +20,11 @@ public class ActorLite {
         ActorLite.with(application, new ActorSystemConfiguration.Builder().build());
     }
 
-    public static void with(final @NonNull Application application,
-                            ActorSystemConfiguration configuration) {
-        Chain.let(new ActorActivityLifeCycleCallbacks(configuration))
-                .apply(registerActivityLifeCycleCallbacks(application))
-                .to(application instanceof Actor)
-                .when(isTrue())
-                .thenMap(toActor(application))
-                .apply(registerToActorSystem());
-    }
-
-    @NonNull
-    private static Consumer<ActorActivityLifeCycleCallbacks> registerActivityLifeCycleCallbacks(
-            @NonNull final Application application) {
-        return new Consumer<ActorActivityLifeCycleCallbacks>() {
-            @Override
-            public void accept(ActorActivityLifeCycleCallbacks actorActivityLifeCycleCallbacks) {
-                application.registerActivityLifecycleCallbacks(actorActivityLifeCycleCallbacks);
-            }
-        };
-    }
-
-    @NonNull
-    private static Predicate<Boolean> isTrue() {
-        return new Predicate<Boolean>() {
-            @Override
-            public boolean test(Boolean aBoolean) throws Exception {
-                return aBoolean;
-            }
-        };
-    }
-
-    @NonNull
-    private static Function<Boolean, Actor> toActor(@NonNull final Application application) {
-        return new Function<Boolean, Actor>() {
-            @Override
-            public Actor apply(Boolean aBoolean) throws Exception {
-                return (Actor) application;
-            }
-        };
-    }
-
-    @NonNull
-    private static Consumer<Actor> registerToActorSystem() {
-        return new Consumer<Actor>() {
-            @Override
-            public void accept(Actor actor) throws Exception {
-                ActorSystem.register(actor);
-            }
-        };
+    public static void with(@NonNull Application application, ActorSystemConfiguration configuration) {
+        application.registerActivityLifecycleCallbacks(new ActorActivityLifeCycleCallbacks(configuration));
+        if (application instanceof Actor) {
+            ActorSystem.register((Actor) application);
+        }
     }
 
 }

@@ -32,13 +32,36 @@ public class ActorSystemInstance {
     private final TypedMap<ReplaySubject<Message>> mailboxes;
     private final TypedMap<Disposable> actorsDisposables;
     private final ActorsInjector actorsInjector;
+    private final ActorSystemConfiguration configuration;
 
 
     private ActorSystemInstance() {
-        lock = new Object();
-        mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
-        actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
-        actorsInjector = new ActorsInjector(this);
+        this(new ActorSystemConfiguration.Builder().build());
+    }
+
+    private ActorSystemInstance(ActorSystemConfiguration configuration) {
+        this.configuration = configuration;
+        this.lock = new Object();
+        this.mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
+        this.actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
+        this.actorsInjector = new ActorsInjector(this);
+
+    }
+
+    public static ActorSystemInstance getInstance(Object key, ActorSystemConfiguration configuration) {
+        synchronized (ActorSystemInstance.class) {
+            return doGetInstance(key, configuration);
+        }
+    }
+
+    @NonNull
+    private static ActorSystemInstance doGetInstance(Object key, ActorSystemConfiguration configuration) {
+        ActorSystemInstance actorSystem = instances.get(key);
+        if (actorSystem == null) {
+            actorSystem = new ActorSystemInstance(configuration);
+            instances.put(key, actorSystem);
+        }
+        return actorSystem;
     }
 
     public static ActorSystemInstance getInstance(Object key) {
@@ -173,7 +196,9 @@ public class ActorSystemInstance {
                 .apply(addDisposable(actor))
                 .apply(clearMailboxBuilder());
 
-        actorsInjector.injectFor(actor);
+        if (configuration.spawnActors) {
+            actorsInjector.injectFor(actor);
+        }
     }
 
     @NonNull
@@ -328,7 +353,11 @@ public class ActorSystemInstance {
     }
 
     private void doUnregisterClass(final Class<?> actor) {
-        actorsInjector.clearFor(actor);
+
+        if (configuration.spawnActors) {
+            actorsInjector.clearFor(actor);
+        }
+
         mailboxes.getOrIgnore(actor)
                 .doOnNext(invokeMailboxOnComplete())
                 .doOnNext(removeMailboxByClass(actor))
@@ -411,7 +440,10 @@ public class ActorSystemInstance {
     }
 
     private void doUnregisterObject(final @NonNull Object actor) {
-        actorsInjector.clearFor(actor);
+        if (configuration.spawnActors) {
+            actorsInjector.clearFor(actor);
+        }
+
         mailboxes.getOrIgnore(actor)
                 .doOnSuccess(invokeMailboxOnComplete())
                 .doOnSuccess(removeMailboxByObject(actor))
@@ -422,7 +454,6 @@ public class ActorSystemInstance {
 
 
     }
-
 
 
     @NonNull
