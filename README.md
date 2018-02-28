@@ -196,7 +196,17 @@ ActorScheduler.after(5000) // 5000 milliseconds
             .send(message, MainFragment.class);
 ```
 
-If the <b>MainFragment</b> unregistered itself from <b>ActorSystem</b> before the message is sent, nothing will happen
+# Sending a message to an actor and receiving response
+
+In the Message object, you can set the <b>replyToActor</b> parameter so the message receiver can reply back to the sender, suppose this sample code is from a class named MyActor :
+
+```java
+MyCustomObject myCustomObject = ...;
+Message message = new Message(MainFragment.MESSAGE_ID_DO_SOMETHING, myCustomObject, MyActor.class);
+ActorSystem.send(message, MainFragment.class);
+```
+
+now the receiver (MainFragment.class) can send a message back to <b>MyActor.class</b> when it is done
 
 # Setup android components as actors manually
 
