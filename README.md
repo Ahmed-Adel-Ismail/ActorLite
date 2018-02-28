@@ -261,7 +261,7 @@ public abstract class MyActorService extends Service implements Actor {
 
 your Actor can implement <b>OnActorUnregistered</b> to get notified when it is un-registered from the Actor-System, this is Ideal for Actors that are registered and un-registered from out-side there classes, in the next section, you will find heavy use of this interface
 
-# Dependency Injection with @Spawn - Working with Actor-Model Architecture
+# Dependency Injection with @Spawn
 
 Starting from version 1.0.0, you can <b>Spawn</b> Actors through annotations, in other words, you can tell the Actor-System to create another Actor for your current Actor, and when your current Actor is un-registered from the system, the spawned Actors are un-registered as well ... notice that Actors are meant to be singletons in there scope, so if you request to Spawn an Actor multiple times in the same scope, only one Actor will be available in this scope.
 
