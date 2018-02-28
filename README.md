@@ -359,7 +359,6 @@ public class Repository implements Actor {
     @Override
     public void onMessageReceived(Message message) {
         ActorSystem.send(new Message(ServerDataSource.MSG_PING,"message from repository"), ServerDataSource.class);
-
         ActorSystem.send(new Message(DatabaseDataSource.MSG_PING,"message from repository"), DatabaseDataSource.class);
     }
 
