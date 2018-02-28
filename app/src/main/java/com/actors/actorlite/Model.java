@@ -21,7 +21,7 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 
-    public Model(){
+    public Model() {
         Log.w(getClass().getSimpleName(), "initialized()");
     }
 
@@ -30,7 +30,8 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
         Log.e(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
         Log.e(getClass().getSimpleName(), message.getContent());
 
-        ActorSystem.send(new Message(Repository.MSG_PING,"message from Model"),Repository.class);
+        ActorSystem.send(new Message(Repository.MSG_PING, "message from Model",Model.class),
+                Repository.class);
     }
 
     @NonNull

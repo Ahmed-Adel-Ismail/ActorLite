@@ -29,7 +29,7 @@ public class MainApp extends Application implements Actor {
     @Override
     public void onCreate() {
         super.onCreate();
-        ActorLite.with(this, actorSystemConfiguration());
+        ActorLite.with(this);
         startService(new Intent(this, MainService.class));
     }
 

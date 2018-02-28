@@ -8,7 +8,7 @@ import com.chaining.Chain;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,8 +49,7 @@ class ActorsInjector {
                 .map(toClass())
                 .when(isAnnotatedWithSpawn())
                 .thenMap(toSpawnAnnotation())
-                .map(toValuesArray())
-                .map(toValuesList())
+                .map(toValuesAndActorNamesClassList())
                 .defaultIfEmpty(new ArrayList<Class<? extends Actor>>())
                 .flatMap(toActorClassObservable())
                 .filter(byNonRegisteredActorClasses())
@@ -92,21 +91,24 @@ class ActorsInjector {
     }
 
     @NonNull
-    private Function<Spawn, Class<? extends Actor>[]> toValuesArray() {
-        return new Function<Spawn, Class<? extends Actor>[]>() {
+    private Function<Spawn, List<Class<? extends Actor>>> toValuesAndActorNamesClassList() {
+        return new Function<Spawn, List<Class<? extends Actor>>>() {
             @Override
-            public Class<? extends Actor>[] apply(Spawn spawn) throws Exception {
-                return spawn.value();
-            }
-        };
-    }
+            public List<Class<? extends Actor>> apply(Spawn spawn) throws Exception {
 
-    @NonNull
-    private Function<Class<? extends Actor>[], List<Class<? extends Actor>>> toValuesList() {
-        return new Function<Class<? extends Actor>[], List<Class<? extends Actor>>>() {
-            @Override
-            public List<Class<? extends Actor>> apply(Class<? extends Actor>[] classes) throws Exception {
-                return Arrays.asList(classes);
+                Class<? extends Actor>[] classes = spawn.value();
+                String[] classesNames = spawn.actorClasses();
+                List<Class<? extends Actor>> spawningClasses = new LinkedList<>();
+
+                if (Spawn.NullActor.class != classes[0]) {
+                    spawningClasses.addAll(Arrays.asList(classes));
+                }
+
+                if (!Spawn.NO_ACTORS_CLASSES.equals(classesNames[0])) {
+                    appendActorClassFromClassName(classesNames, spawningClasses);
+                }
+
+                return spawningClasses;
             }
         };
     }
@@ -171,6 +173,18 @@ class ActorsInjector {
                 injectedActorsOwners.put(injectedActor, actor);
             }
         };
+    }
+
+    @SuppressWarnings("unchecked")
+    private void appendActorClassFromClassName(String[] classesNames,
+                                               List<Class<? extends Actor>> spawningClasses) {
+        for (String className : classesNames) {
+            try {
+                spawningClasses.add((Class<? extends Actor>) Class.forName(className));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     void clearFor(final Object actor) {
