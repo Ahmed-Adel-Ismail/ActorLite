@@ -35,15 +35,15 @@ public class MainActivity extends AppCompatActivity implements Actor, OnActorUnr
         setContentView(R.layout.activity_main);
         model = ViewModelProviders.of(this).get(Model.class);
         ActorSystem.register(model);
-//        getSupportFragmentManager()
-//                .beginTransaction()
-//                .add(new MainFragment(), "MAIN FRAGMENT")
-//                .commit();
-//
-//        getFragmentManager()
-//                .beginTransaction()
-//                .add(new NonSupportFragment(), "NON SUPPORT FRAGMENT")
-//                .commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(new MainFragment(), "MAIN FRAGMENT")
+                .commit();
+
+        getFragmentManager()
+                .beginTransaction()
+                .add(new NonSupportFragment(), "NON SUPPORT FRAGMENT")
+                .commit();
 
 
     }
