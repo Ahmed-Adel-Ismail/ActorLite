@@ -432,7 +432,7 @@ public class DatabaseDataSource implements Actor, OnActorUnregistered {
  }
  ```
 
-So all those Actors will be available as long as the Activity is registered ... in real life, you will not need to Spawn the Model, you will need to spawn Actors starting from the Repository class and it's dependencies
+So all those Actors will be available as long as the Activity is registered
 
 
 # Tips
