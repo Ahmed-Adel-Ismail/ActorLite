@@ -343,7 +343,7 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
 }
 ```
 
-Our Model requested from the Actor-System to Spawn Repository.java, so the System will create this Actor as long as the Model is registered :
+Our Model requested from the Actor-System to Spawn Repository.java, so the System will create this Actor as long as the Model is registered, and it will unregister this Actor when the Model is unregistered ... notice that the Spawned Actor will be registered as long as the first Actor that requested it to be spawned is still registered as well, and it will unregister on it's unregistration from the Actor-System  :
 
 ```java
 @Spawn({ServerDataSource.class, DatabaseDataSource.class})
