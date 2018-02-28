@@ -1,9 +1,11 @@
 package com.actors.actorlite;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 
 import com.actors.Actor;
 import com.actors.ActorScheduler;
@@ -23,20 +25,25 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class MainActivity extends AppCompatActivity implements Actor, OnActorUnregistered {
 
     private CommandsMap map = CommandsMap.of(this);
+    private Model model;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(new MainFragment(), "MAIN FRAGMENT")
-                .commit();
-
-        getFragmentManager()
-                .beginTransaction()
-                .add(new NonSupportFragment(), "NON SUPPORT FRAGMENT")
-                .commit();
+        model = ViewModelProviders.of(this).get(Model.class);
+        ActorSystem.register(model);
+//        getSupportFragmentManager()
+//                .beginTransaction()
+//                .add(new MainFragment(), "MAIN FRAGMENT")
+//                .commit();
+//
+//        getFragmentManager()
+//                .beginTransaction()
+//                .add(new NonSupportFragment(), "NON SUPPORT FRAGMENT")
+//                .commit();
 
 
     }
@@ -88,6 +95,10 @@ public class MainActivity extends AppCompatActivity implements Actor, OnActorUnr
 
     @Override
     protected void onDestroy() {
+        ActorSystem.unregister(model);
+        if(isFinishing()){
+            ActorScheduler.cancel(model.getClass());
+        }
         super.onDestroy();
     }
 }

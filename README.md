@@ -265,24 +265,22 @@ your Actor can implement <b>OnActorUnregistered</b> to get notified when it is u
 
 Starting from version 1.0.0, you can <b>Spawn</b> Actors through annotations, in other words, you can tell the Actor-System to create another Actor for your current Actor, and when your current Actor is un-registered from the system, the spawned Actors are un-registered as well ... notice that Actors are meant to be singletons in there scope, so if you request to Spawn an Actor multiple times in the same scope, only one Actor will be available in this scope.
 
+# Sample Module using ActorLite
+
 This is an example for a full MVC example from Activity to Model to repository to data sources :
 
-Our Activity will request from the Actor-System to create our <b>Model</b> Object as long as the Activity is registered :
+Our Activity will create it's Model (which extends the new architecture components ViewModel), and it will register it to the Actor-System, as follows :
 
 ```Java
-@Spawn(Model.class)
 public class MainActivity extends AppCompatActivity implements Actor {
 
+    private Model model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // you should not send messaged in onCreate since
-        // Actor-System works on the main Looper and will
-        // wait until onCreate() is finished to
-        // spawn (create) and register Actors mentioned
-        // in @Spawn
-
+        model = ViewModelProviders.of(this).get(Model.class);
+        ActorSystem.register(model);
     }
 
     @Override
@@ -303,26 +301,33 @@ public class MainActivity extends AppCompatActivity implements Actor {
     public Scheduler observeOnScheduler() {
         return AndroidSchedulers.mainThread();
     }
+
+    @Override
+    protected void onDestroy() {
+        ActorSystem.unregister(model);
+        if(isFinishing()){
+            ActorScheduler.cancel(model.getClass());
+        }
+        super.onDestroy();
+    }
 }
 ```
 
-And Our Model.Java (which will be created by the Actor-System) will be as follows :
+And Our Model will request from the ActorSystem to spawn a Repository Actor for it, in other words, it requests from ActorSystem to create a Repository instance (if not created), so as soon as this Model is registered to ActorSystem, the Repository Actor will be registered as well :
 
 ```java
 @Spawn(Repository.class)
-public class Model implements Actor, OnActorUnregistered {
+public class Model extends ViewModel implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 
-    public Model(){
-        // spawned Actors should have a default constructor
-        // or no constructors at all
-    }
 
     @Override
     public void onMessageReceived(Message message) {
-        Message newMessage = new Message(Repository.MSG_PING,"message from Model");
-        ActorSystem.send(newMessage,Repository.class);
+        if(message.getId() == MSG_PING) {
+            Message newMessage = new Message(Repository.MSG_PING,message.getContent());
+            ActorSystem.send(newMessage,Repository.class);
+        }
     }
 
     @NonNull
@@ -345,6 +350,11 @@ Our Model requested from the Actor-System to Spawn Repository.java, so the Syste
 public class Repository implements Actor {
 
     public static final int MSG_PING = 1;
+
+    public Repository(){
+        // spawned Actors should have a default constructor
+        // or no constructors at all
+    }
 
     @Override
     public void onMessageReceived(Message message) {
