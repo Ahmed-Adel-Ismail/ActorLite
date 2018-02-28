@@ -318,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements Actor {
     protected void onDestroy() {
         ActorSystem.unregister(model);
         if(isFinishing()){
+            // cancel pending messages
             ActorScheduler.cancel(model.getClass());
         }
         super.onDestroy();
