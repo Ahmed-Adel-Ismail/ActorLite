@@ -334,7 +334,6 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
 
-
     @Override
     public void onMessageReceived(Message message) {
         if(message.getId() == MSG_PING) {
@@ -438,7 +437,7 @@ public class DatabaseDataSource implements Actor, OnActorUnregistered {
  You can Spawn all the desired Actors when you start your Activity as follows :
 
  ```Java
- @Spawn({Model.class, Repository.class, ServerDataSource.class, DatabaseDataSource.class})
+ @Spawn({Repository.class, ServerDataSource.class, DatabaseDataSource.class})
  public class MainActivity extends AppCompatActivity implements Actor {
     ...
  }
