@@ -275,6 +275,8 @@ your Actor can implement <b>OnActorUnregistered</b> to get notified when it is u
 
 Starting from version 1.0.0, you can <b>Spawn</b> Actors through annotations, in other words, you can tell the Actor-System to create another Actor for your current Actor, and when your current Actor is un-registered from the system, the spawned Actors are un-registered as well ... notice that Actors are meant to be singletons in there scope, so if you request to Spawn an Actor multiple times in the same scope, only one Actor will be available in this scope.
 
+Notice also that the Spawned Actor will un-register when the one created it is unregistered, so make sure you have a uni-directional flow of dependencies when spawning Actors, like in the following <b>Sample Module</b>
+
 # Sample Module using ActorLite
 
 This is an example for a full MVC example from Activity to Model to repository to data sources :
