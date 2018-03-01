@@ -1,7 +1,22 @@
 [![](https://jitpack.io/v/Ahmed-Adel-Ismail/ActorLite.svg)](https://jitpack.io/#Ahmed-Adel-Ismail/ActorLite)
 
 # ActorLite
+
 A Light weight Actor Model library that helps communication between Android Components in a Message Driven manner
+
+# Why ActorLite
+
+ActorLite is based on ErLang's Actor-Model, which depends on communicating between components through messages instead of method calls, this guarantees a very decoupled application
+
+Also being an Actor means that this Actor component (Class) will receive messages on it's own thread, which makes this architecture thread safe
+
+all you need to do is to implement the Actor interface, and you can use <b>ActorSystem</b> to send messages to classes that implement the Actor interface
+
+and as an implementer to the actor interface, you should provide the Thread that your Actor will receive it's messages on, and implement <i>onMessageReceived()</i> to handle incoming messages
+
+also as an actor you do not need to create any other objects, all you need to do is to tell the Actor-System to spawn (create) other Actors for you ... you do not need a dependency injection framework since it is already running under the hood of this framework
+
+you can jump to see the sample code for fully functional module <a href="https://github.com/Ahmed-Adel-Ismail/ActorLite/blob/master/README.md#dependency-injection-with-spawn">here</a>
 
 # How It Works
 For every class that implements the <b>Actor</b> interface, it registers itself to the <b>ActorSystem</b>, which is responsible for delivering messages between the registered Actors through there address, the address of any Actor is the <b>Class</b> of it, for example the address of the <b>MainActivity</b> is <b>MainActivity.class</b>, and so on
