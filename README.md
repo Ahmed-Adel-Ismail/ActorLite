@@ -475,7 +475,7 @@ public class DatabaseDataSource implements Actor, OnActorUnregistered {
 }
 ```
 
- Notice that if you Spawn an actor multiple times in the same scope, only one instance will be created and running, and it will be unregistered when the first Actor requesting it's Spawn is unregistered as well
+ Notice that if you Spawn an actor multiple times in the same scope, only one instance will be created and running, and it will stay registered until all the actors depending on it are unregistered
 
  You can Spawn all the desired Actors when you start your Activity as follows :
 
