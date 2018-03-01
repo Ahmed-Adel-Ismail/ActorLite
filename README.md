@@ -215,7 +215,7 @@ instead of passing too many parameters, you can use ActorSystem.createMessage() 
 ```java
 ActorSystem.createMessage(MSG_ID)
         .withContent("message content")
-        .withReplyToActor(Model.class)
+        .withReplyToActor(MyActor.class)
         .withReceiverActors(ReceiverOne.class, ReceiverTwo.class)
         .send();
 ```
