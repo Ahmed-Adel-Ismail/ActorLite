@@ -208,6 +208,18 @@ ActorSystem.send(message, MainFragment.class);
 
 now the receiver (MainFragment.class) can send a message back to <b>MyActor.class</b> when it is done
 
+# Using Message Builder
+
+instead of passing too many parameters, you can use ActorSystem.createMessage() as follows :
+
+```java
+ActorSystem.createMessage(MSG_ID)
+        .withContent("message content")
+        .withReplyToActor(Model.class)
+        .withReceiverActors(ReceiverOne.class, ReceiverTwo.class)
+        .send();
+```
+
 # Setup android components as actors manually
 
 Remember that you do not need to setup Activities Manually in all cases, so If you choose to Register and Unregister The remaining Android components manually, here is what to be done in every type :
@@ -274,8 +286,6 @@ your Actor can implement <b>OnActorUnregistered</b> to get notified when it is u
 # Dependency Injection with @Spawn
 
 Starting from version 1.0.0, you can <b>Spawn</b> Actors through annotations, in other words, you can tell the Actor-System to create another Actor for your current Actor, and when your current Actor is un-registered from the system, the spawned Actors are un-registered as well ... notice that Actors are meant to be singletons in there scope, so if you request to Spawn an Actor multiple times in the same scope, only one Actor will be available in this scope.
-
-Notice also that the Spawned Actor will un-register when the one created it is unregistered, so make sure you have a uni-directional flow of dependencies when spawning Actors, like in the following <b>Sample Module</b>
 
 # Sample Module using ActorLite
 
@@ -354,6 +364,24 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
     }
 }
 ```
+
+you can pass to the @Spawn annotation a fully qualified class name (which implements Actor) instead of passing the Class, like for example :
+
+```java
+@Spawn(actorClasses = "com.actors.actorlite.Repository")
+public class Model extends ViewModel implements Actor, OnActorUnregistered {
+...
+}
+```
+
+and by the way you can send to this actor by it's fully qualified name as well, for example :
+
+```java
+ActorSystem.send(message, "com.actors.actorlite.Repository");
+```
+
+if the class is not available or not an Actor, the ActorSystem will print an Exception and wont spawn the wrong elements
+
 
 Our Model requested from the Actor-System to Spawn Repository.java, so the System will create this Actor as long as the Model is registered, and it will unregister this Actor when the Model is unregistered ... notice that the Spawned Actor will be registered as long as the first one that requested it to be spawned is still registered as well, and it will unregister on it's unregistration from the Actor-System  :
 
@@ -499,7 +527,7 @@ Step 2. Add the dependency
 
 ```gradle
 dependencies {
-        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:1.0.1'
+        compile 'com.github.Ahmed-Adel-Ismail:ActorLite:1.1.0'
 }
 ```
 

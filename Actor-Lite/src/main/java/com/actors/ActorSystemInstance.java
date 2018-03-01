@@ -5,7 +5,9 @@ import android.support.annotation.RestrictTo;
 
 import com.chaining.Chain;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Maybe;
@@ -82,28 +84,37 @@ public class ActorSystemInstance {
         return actorSystem;
     }
 
+    /**
+     * start building a message to be sent across the Actor System
+     *
+     * @param id the id of the message
+     * @return a {@link MessageBuilder} to handle building the message
+     */
+    public MessageBuilder createMessage(int id) {
+        return new MessageBuilder(this, id);
+    }
 
     /**
      * send an empty {@link Message} with the passed id
      *
-     * @param messageId       the id of the {@link Message}
-     * @param actorsAddresses the actor (or group of actorsAddresses) that will receive this message
+     * @param messageId the id of the {@link Message}
+     * @param actors    the actor (or group of actors) that will receive this message
      */
-    public void send(int messageId, @NonNull Class<?>... actorsAddresses) {
-        send(new Message(messageId), actorsAddresses);
+    public void send(int messageId, @NonNull Class<?>... actors) {
+        send(new Message(messageId), actors);
     }
 
     /**
      * send a {@link Message} to a mailbox
      *
-     * @param message         the {@link Message} object
-     * @param actorsAddresses the actor (or group of actors) that will receive this message
+     * @param message the {@link Message} object
+     * @param actors  the actor (or group of actors) that will receive this message
      */
-    public void send(final Message message, @NonNull Class<?>... actorsAddresses) {
-        if (actorsAddresses.length == 0) {
+    public void send(final Message message, @NonNull Class<?>... actors) {
+        if (actors.length == 0) {
             throw new UnsupportedOperationException("no Actors passed to the parameters");
         }
-        Observable.fromArray(actorsAddresses)
+        Observable.fromArray(actors)
                 .flatMap(toMailboxMaybe())
                 .blockingSubscribe(invokeMailboxOnNext(message), printStackTrace());
     }
@@ -136,6 +147,36 @@ public class ActorSystemInstance {
                 throwable.printStackTrace();
             }
         };
+    }
+
+    /**
+     * send an empty {@link Message} with the passed id
+     *
+     * @param messageId        the id of the {@link Message}
+     * @param actorsClassNames the fully qualified class name for
+     *                         the actor (or group of actors) that will receive this message
+     */
+    public void send(int messageId, @NonNull String... actorsClassNames) {
+        send(new Message(messageId), actorsClassNames);
+    }
+
+    /**
+     * send a {@link Message} to a mailbox
+     *
+     * @param message          the {@link Message} object
+     * @param actorsClassNames the fully qualified class name for
+     *                         the actor (or group of actors) that will receive this message
+     */
+    public void send(final Message message, @NonNull String... actorsClassNames) {
+        List<Class<?>> classes = new ArrayList<>();
+        for (String actorClassName : actorsClassNames) {
+            try {
+                classes.add(Class.forName(actorClassName));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        send(message, classes.toArray(new Class<?>[0]));
     }
 
     /**

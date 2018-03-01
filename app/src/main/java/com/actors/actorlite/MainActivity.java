@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements Actor, OnActorUnr
         message = new Message(R.id.message_id_print_application_log, text);
         ActorSystem.send(message, MainApp.class);
 
+
         // send message after 3 seconds :
         message = new Message(R.id.message_id_print_service_log, text);
         ActorScheduler.after(3000)

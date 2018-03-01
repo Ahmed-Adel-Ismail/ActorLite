@@ -21,6 +21,16 @@ public class ActorSystem {
     }
 
     /**
+     * start building a message to be sent across the Actor System
+     *
+     * @param id the id of the message
+     * @return a {@link MessageBuilder} to handle building the message
+     */
+    public static MessageBuilder createMessage(int id) {
+        return implementation.createMessage(id);
+    }
+
+    /**
      * send an empty {@link Message} with the passed id
      *
      * @param messageId       the id of the {@link Message}
@@ -40,6 +50,27 @@ public class ActorSystem {
         implementation.send(message, actorsAddresses);
     }
 
+    /**
+     * send an empty {@link Message} with the passed id
+     *
+     * @param messageId        the id of the {@link Message}
+     * @param actorsClassNames the fully qualified class name for
+     *                         the actor (or group of actors) that will receive this message
+     */
+    public static void send(int messageId, @NonNull String... actorsClassNames) {
+        implementation.send(new Message(messageId), actorsClassNames);
+    }
+
+    /**
+     * send a {@link Message} to a mailbox
+     *
+     * @param message          the {@link Message} object
+     * @param actorsClassNames the fully qualified class name for
+     *                         the actor (or group of actors) that will receive this message
+     */
+    public static void send(final Message message, @NonNull String... actorsClassNames) {
+        implementation.send(message, actorsClassNames);
+    }
 
     /**
      * register a class to a mailbox but with the default configurations

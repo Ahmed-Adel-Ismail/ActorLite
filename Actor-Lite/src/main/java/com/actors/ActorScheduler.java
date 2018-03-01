@@ -27,11 +27,11 @@ public class ActorScheduler {
      * schedule to send a {@link Message} after the passed milliseconds
      *
      * @param millis the delay in milliseconds
-     * @return a {@link Sender} to send a scheduled {@link Message}
+     * @return a {@link ScheduledMessageSender} to send a scheduled {@link Message}
      */
 
     @NonNull
-    public static Sender after(@IntRange(from = 0) long millis) {
+    public static ScheduledMessageSender after(@IntRange(from = 0) long millis) {
         return after(millis, ActorSystemInstance.getInstance(null));
     }
 
@@ -40,11 +40,11 @@ public class ActorScheduler {
      *
      * @param millis      the delay in milliseconds
      * @param actorSystem the custom {@link ActorSystemInstance} : for unit testing only
-     * @return a {@link Sender} to send a scheduled {@link Message}
+     * @return a {@link ScheduledMessageSender} to send a scheduled {@link Message}
      */
     @NonNull
-    static Sender after(@IntRange(from = 0) long millis, ActorSystemInstance actorSystem) {
-        return new Sender(millis, actorSystem);
+    static ScheduledMessageSender after(@IntRange(from = 0) long millis, ActorSystemInstance actorSystem) {
+        return new ScheduledMessageSender(millis, actorSystem);
     }
 
 

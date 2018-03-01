@@ -15,10 +15,11 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
-@Spawn({ServerDataSource.class, DatabaseDataSource.class})
+@Spawn(value = ServerDataSource.class, actorClasses = "com.actors.actorlite.DatabaseDataSource")
 public class Repository implements Actor, OnActorUnregistered {
 
     public static final int MSG_PING = 1;
+    public static final int MSG_PING_RESPONSE = 2;
 
     public Repository() {
         Log.w(getClass().getSimpleName(), "initialized()");
@@ -26,11 +27,25 @@ public class Repository implements Actor, OnActorUnregistered {
 
     @Override
     public void onMessageReceived(Message message) {
-        Log.e(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
-        Log.e(getClass().getSimpleName(), message.getContent().toString());
 
-        ActorSystem.send(new Message(ServerDataSource.MSG_PING,"message from repository"), ServerDataSource.class);
-        ActorSystem.send(new Message(DatabaseDataSource.MSG_PING,"message from repository"), DatabaseDataSource.class);
+        Log.w(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
+        Log.w(getClass().getSimpleName(), message.getContent().toString());
+
+        ActorSystem.createMessage(DatabaseDataSource.MSG_PING)
+                .withContent("message from repository")
+                .withReceiverActors("com.actors.actorlite.DatabaseDataSource")
+                .send();
+
+        ActorSystem.createMessage(ServerDataSource.MSG_PING)
+                .withContent("message from repository")
+                .withReceiverActors(ServerDataSource.class)
+                .send();
+
+        ActorSystem.createMessage(MSG_PING_RESPONSE)
+                .withContent("response from repository")
+                .withReceiverActors(message.getReplyToActor())
+                .send();
+
     }
 
     @NonNull

@@ -1,6 +1,7 @@
 package com.actors;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 
 import com.actors.annotations.Spawn;
 import com.chaining.Chain;
@@ -8,9 +9,11 @@ import com.chaining.Chain;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -27,7 +30,7 @@ import io.reactivex.functions.Predicate;
  */
 class ActorsInjector {
 
-    private final ConcurrentMap<Actor, Object> injectedActorsOwners = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Actor, Set<Object>> injectedActorsOwners = new ConcurrentHashMap<>();
     private final ActorSystemInstance actorSystem;
 
     ActorsInjector(ActorSystemInstance actorSystem) {
@@ -170,7 +173,9 @@ class ActorsInjector {
         return new Consumer<Actor>() {
             @Override
             public void accept(Actor injectedActor) throws Exception {
-                injectedActorsOwners.put(injectedActor, actor);
+                Set<Object> owners = getOrCreateOwners(injectedActor);
+                owners.add(actor);
+                injectedActorsOwners.put(injectedActor, owners);
             }
         };
     }
@@ -187,6 +192,15 @@ class ActorsInjector {
         }
     }
 
+    @NonNull
+    private Set<Object> getOrCreateOwners(Actor injectedActor) {
+        Set<Object> owners = injectedActorsOwners.get(injectedActor);
+        if (owners == null) {
+            owners = new LinkedHashSet<>();
+        }
+        return owners;
+    }
+
     void clearFor(final Object actor) {
         try {
             invokeClearFor(actor);
@@ -197,27 +211,32 @@ class ActorsInjector {
 
     private void invokeClearFor(Object actor) {
         Observable.fromIterable(injectedActorsOwners.entrySet())
-                .filter(byOwner(actor))
+                .filter(byNonRegisteredOwners(actor))
                 .map(toInjectedActor())
+                .doOnNext(removeFromInjectedActorsOwners())
                 .doOnNext(unregisterInjectedActor())
-                .blockingForEach(removeFromInjectedActorsOwners());
+                .blockingSubscribe();
     }
 
     @NonNull
-    private Predicate<Map.Entry<Actor, Object>> byOwner(final Object actor) {
-        return new Predicate<Map.Entry<Actor, Object>>() {
+    private Predicate<Map.Entry<Actor, Set<Object>>> byNonRegisteredOwners(final Object actor) {
+        return new Predicate<Map.Entry<Actor, Set<Object>>>() {
             @Override
-            public boolean test(Map.Entry<Actor, Object> injectedActorOwner) throws Exception {
-                return actor.equals(injectedActorOwner.getValue());
+            public boolean test(Map.Entry<Actor, Set<Object>> injectedActorsOwners) throws Exception {
+                Set<Object> owners = injectedActorsOwners.getValue();
+                if(owners != null) {
+                    owners.remove(actor);
+                }
+                return owners == null || owners.isEmpty();
             }
         };
     }
 
     @NonNull
-    private Function<Map.Entry<Actor, Object>, Actor> toInjectedActor() {
-        return new Function<Map.Entry<Actor, Object>, Actor>() {
+    private Function<Map.Entry<Actor, Set<Object>>, Actor> toInjectedActor() {
+        return new Function<Map.Entry<Actor, Set<Object>>, Actor>() {
             @Override
-            public Actor apply(Map.Entry<Actor, Object> injectedActorOwner) throws Exception {
+            public Actor apply(Map.Entry<Actor, Set<Object>> injectedActorOwner) throws Exception {
                 return injectedActorOwner.getKey();
             }
         };
@@ -243,7 +262,8 @@ class ActorsInjector {
         };
     }
 
-    Map<Actor, Object> getInjectedActorsOwners() {
+    @RestrictTo(RestrictTo.Scope.TESTS)
+    Map<Actor, Set<Object>> getInjectedActorsOwners() {
         return injectedActorsOwners;
     }
 }

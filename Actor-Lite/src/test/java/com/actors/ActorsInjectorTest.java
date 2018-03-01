@@ -8,6 +8,8 @@ import com.chaining.Lazy;
 import org.junit.After;
 import org.junit.Test;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Scheduler;
@@ -86,22 +88,49 @@ public class ActorsInjectorTest {
     }
 
     @Test
-    public void clearForMultipleActorsThenUnregisterSpawnedActorWhenTheOldestActorUnregisters() {
+    public void clearForMultipleActorsThenDoNotUnregisterSpawnedActorWhenTheLastActorIsNotUnregistered() {
 
-        ActorSystemInstance system = ActorSystemInstance.getInstance("4", configuration());
+        ActorSystemInstance system = ActorSystemInstance.getInstance("5", configuration());
 
-        OwnerTwo ownerTwo = new OwnerTwo();
         OwnerOne owner = new OwnerOne();
+        OwnerTwo ownerTwo = new OwnerTwo();
 
         system.register(ownerTwo);
         system.register(owner);
         system.unregister(owner);
 
-        assertTrue(system.getActorsInjector().getInjectedActorsOwners().size() == 1
-                && system.getActorsInjector().getInjectedActorsOwners().containsValue(ownerTwo));
+        assertTrue(system.getActorsInjector().getInjectedActorsOwners().size() == 1 &&
+                containsOwner(system.getActorsInjector().getInjectedActorsOwners(), ownerTwo));
 
     }
 
+    private boolean containsOwner(Map<Actor, Set<Object>> injectedActorsOwners, Object owner) {
+        for (Set<Object> owners : injectedActorsOwners.values()) {
+            if (owners.contains(owner)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Test
+    public void clearForMultipleActorsThenUnregisterSpawnedActorWhenTheLastActorUnregisters() {
+
+        ActorSystemInstance system = ActorSystemInstance.getInstance("5", configuration());
+
+        OwnerTwo owner = new OwnerTwo();
+        OwnerTwo ownerTwo = new OwnerTwo();
+
+
+        system.register(ownerTwo);
+        system.register(owner);
+        system.unregister(owner);
+        system.unregister(ownerTwo);
+
+
+        assertTrue(system.getActorsInjector().getInjectedActorsOwners().isEmpty());
+
+    }
 
 }
 

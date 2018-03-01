@@ -27,11 +27,18 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
 
     @Override
     public void onMessageReceived(Message message) {
-        Log.e(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
-        Log.e(getClass().getSimpleName(), message.getContent());
+        Log.w(getClass().getSimpleName(), "Thread : " + Thread.currentThread().getName());
+        Log.w(getClass().getSimpleName(), message.getContent().toString());
 
-        ActorSystem.send(new Message(Repository.MSG_PING, "message from Model",Model.class),
-                Repository.class);
+        if (message.getId() == MSG_PING) {
+            ActorSystem.createMessage(Repository.MSG_PING)
+                    .withContent("message from Model")
+                    .withReplyToActor(Model.class)
+                    .withReceiverActors(Repository.class)
+                    .send();
+        } else if (message.getId() == Repository.MSG_PING_RESPONSE) {
+            // handle repository response
+        }
     }
 
     @NonNull

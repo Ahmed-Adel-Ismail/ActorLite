@@ -11,12 +11,12 @@ import io.reactivex.functions.Consumer;
 /**
  * a class that handles sending a scheduled {@link Message}
  */
-public class Sender {
+public class ScheduledMessageSender {
 
     private final long delayMillis;
     private final ActorSystemInstance actorSystem;
 
-    Sender(long delayMillis, ActorSystemInstance actorSystem) {
+    ScheduledMessageSender(long delayMillis, ActorSystemInstance actorSystem) {
         this.delayMillis = delayMillis;
         this.actorSystem = actorSystem;
     }
