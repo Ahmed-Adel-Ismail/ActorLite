@@ -28,7 +28,7 @@ import io.reactivex.subjects.Subject;
  */
 public class ActorSystemInstance {
 
-    private static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>(1);
+    protected static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>(1);
     private static final int MAILBOX_CAPACITY = 10;
 
     private final Object lock;
@@ -38,11 +38,11 @@ public class ActorSystemInstance {
     private final ActorSystemConfiguration configuration;
 
 
-    private ActorSystemInstance() {
+    protected ActorSystemInstance() {
         this(new ActorSystemConfiguration.Builder().build());
     }
 
-    private ActorSystemInstance(ActorSystemConfiguration configuration) {
+    protected ActorSystemInstance(ActorSystemConfiguration configuration) {
         this.configuration = configuration;
         this.lock = new Object();
         this.mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
@@ -211,7 +211,7 @@ public class ActorSystemInstance {
     }
 
     @NonNull
-    private static Consumer<MailboxBuilder> defaultMailboxBuilder(
+    protected Consumer<MailboxBuilder> defaultMailboxBuilder(
             final Object actor,
             final Scheduler observeOn,
             final Consumer<Message> onMessageReceived) {
@@ -227,7 +227,7 @@ public class ActorSystemInstance {
         };
     }
 
-    private void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilderFunction) {
+    protected void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilderFunction) {
         mailboxes.getOrIgnore(actor)
                 .defaultIfEmpty(ReplaySubject.<Message>create(MAILBOX_CAPACITY))
                 .map(toChain())

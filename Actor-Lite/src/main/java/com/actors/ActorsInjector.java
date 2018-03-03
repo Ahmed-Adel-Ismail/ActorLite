@@ -141,7 +141,7 @@ class ActorsInjector {
         return new Function<Class<? extends Actor>, Actor>() {
             @Override
             public Actor apply(Class<? extends Actor> aClass) throws Exception {
-                Constructor constructor = aClass.getConstructor();
+                Constructor constructor = aClass.getDeclaredConstructor();
                 constructor.setAccessible(true);
                 return (Actor) constructor.newInstance();
             }

@@ -122,7 +122,7 @@ public class ActorSystemTest {
     public void sendMessageWithoutPassingActorClassesThenCrash() throws Exception {
         ActorSystemInstance actorSystem = ActorSystemInstance
                 .getInstance("sendMessageWithoutPassingActorClassesThenCrash");
-        actorSystem.send(new Message(1));
+        actorSystem.send(new Message(1), (String) null);
     }
 
     @Test
