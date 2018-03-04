@@ -28,14 +28,14 @@ import io.reactivex.subjects.Subject;
  */
 public class ActorSystemInstance {
 
-    protected static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>(1);
+    protected static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>();
     private static final int MAILBOX_CAPACITY = 10;
 
     private final Object lock;
-    private final TypedMap<ReplaySubject<Message>> mailboxes;
-    private final TypedMap<Disposable> actorsDisposables;
-    private final ActorsInjector actorsInjector;
-    private final ActorSystemConfiguration configuration;
+    protected final TypedMap<ReplaySubject<Message>> mailboxes;
+    protected final TypedMap<Disposable> actorsDisposables;
+    protected final ActorsInjector actorsInjector;
+    protected final ActorSystemConfiguration configuration;
 
 
     protected ActorSystemInstance() {

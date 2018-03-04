@@ -28,7 +28,8 @@ import io.reactivex.functions.Predicate;
  * <p>
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
-class ActorsInjector {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public class ActorsInjector {
 
     private final ConcurrentMap<Actor, Set<Object>> injectedActorsOwners = new ConcurrentHashMap<>();
     private final ActorSystemInstance actorSystem;
@@ -224,7 +225,7 @@ class ActorsInjector {
             @Override
             public boolean test(Map.Entry<Actor, Set<Object>> injectedActorsOwners) throws Exception {
                 Set<Object> owners = injectedActorsOwners.getValue();
-                if(owners != null) {
+                if (owners != null) {
                     owners.remove(actor);
                 }
                 return owners == null || owners.isEmpty();
@@ -265,5 +266,10 @@ class ActorsInjector {
     @RestrictTo(RestrictTo.Scope.TESTS)
     Map<Actor, Set<Object>> getInjectedActorsOwners() {
         return injectedActorsOwners;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public void clear() {
+        injectedActorsOwners.clear();
     }
 }

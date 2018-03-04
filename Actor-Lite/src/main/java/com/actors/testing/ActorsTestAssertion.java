@@ -2,8 +2,6 @@ package com.actors.testing;
 
 import com.actors.Message;
 
-import org.javatuples.Unit;
-
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
@@ -19,11 +17,11 @@ public class ActorsTestAssertion<R> {
     private final ActorTestBuilder<R> testBuilder;
     private final ActorSystemTestInstance system;
     private final Message message;
-    private final Class<?> receiverActor;
+    private final Class<?> targetActor;
 
-    ActorsTestAssertion(ActorTestBuilder<R> testBuilder, Message message, Class<?> receiverActor) {
+    ActorsTestAssertion(ActorTestBuilder<R> testBuilder, Message message, Class<?> targetActor) {
         this.message = message;
-        this.receiverActor = receiverActor;
+        this.targetActor = targetActor;
         this.system = testBuilder.system;
         this.result = testBuilder.result;
         this.testBuilder = testBuilder;
@@ -35,10 +33,15 @@ public class ActorsTestAssertion<R> {
      * @param assertion the assertion function
      * @throws Exception if the assertion function threw an {@link Exception}
      */
-    public void assertResult(Consumer<R> assertion) throws Exception {
-        new ActorSystemTestRegistrations<R>().accept(receiverActor, testBuilder);
-        system.send(message, receiverActor);
+    public void validate(Consumer<R> assertion) throws Exception {
+        testBuilder.registerActors(targetActor);
+        system.send(message, targetActor);
         system.testScheduler.triggerActions();
-        assertion.accept(result.get(0));
+        try {
+            assertion.accept(result.get(0));
+        } finally {
+            system.clear();
+        }
+
     }
 }

@@ -1,20 +1,18 @@
 package com.actors.testing;
 
-import com.actors.Message;
 import com.actors.MessageBuilder;
-import com.actors.MessageSender;
 
 /**
  * a class that builds the Message for testing the Actors communication
  * <p>
  * Created by Ahmed Adel Ismail on 3/3/2018.
  */
-public class ActorsTestMessageBuilder<R> {
+abstract class ActorsTestMessageBuilder<R> {
 
-    private final ActorTestBuilder<R> testBuilder;
-    private final int id;
-    private Object content;
-    private Class<?> replyToActor;
+    final ActorTestBuilder<R> testBuilder;
+    final int id;
+    Object content;
+    Class<?> replyToActor;
 
     ActorsTestMessageBuilder(ActorTestBuilder<R> testBuilder, int id) {
         this.testBuilder = testBuilder;
@@ -45,14 +43,5 @@ public class ActorsTestMessageBuilder<R> {
         return this;
     }
 
-    /**
-     * set the receiver Actor
-     *
-     * @param actor the Actor that will receive the {@link Message}
-     * @return a {@link MessageSender} to handle sending the message
-     */
-    public ActorsTestAssertion<R> withReceiverActor(Class<?> actor) {
-        return new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor), actor);
-    }
 
 }

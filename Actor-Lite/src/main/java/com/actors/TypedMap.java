@@ -1,6 +1,7 @@
 package com.actors;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -20,7 +21,8 @@ import io.reactivex.functions.Predicate;
  * <p>
  * Created by Ahmed Adel Ismail on 10/15/2017.
  */
-class TypedMap<V> implements Iterable<Entry<Object, V>> {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public class TypedMap<V> implements Iterable<Entry<Object, V>> {
 
     private final Map<Object, V> map;
 
@@ -190,7 +192,7 @@ class TypedMap<V> implements Iterable<Entry<Object, V>> {
      * clear the current stored values
      */
     @NonNull
-    TypedMap<V> clear() {
+    public TypedMap<V> clear() {
         map.clear();
         return this;
     }

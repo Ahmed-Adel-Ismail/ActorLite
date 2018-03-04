@@ -11,7 +11,6 @@ import com.actors.Message;
 import com.functional.curry.Curry;
 
 import org.javatuples.Pair;
-import org.javatuples.Unit;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -27,20 +26,20 @@ import io.reactivex.functions.Function;
  * Created by Ahmed Adel Ismail on 3/3/2018.
  */
 @SuppressLint("RestrictedApi")
-public class ActorTestBuilder<R> {
+abstract class ActorTestBuilder<R> {
 
     final List<R> result;
     final ActorSystemTestInstance system;
-    final Class<?> callbackActor;
-    final Function<Message, R> validationFunction;
-    final List<Pair<Class<?>, Consumer<Message>>> mockers;
+    final Class<?> validateOnActor;
+    final Function<Object, R> validationFunction;
+    final List<Pair<Class<?>, Consumer<Message>>> mocks;
 
-    ActorTestBuilder(Class<?> callbackActor, boolean spawning, Function<Message, R> validationFunction) {
+    ActorTestBuilder(Class<?> validateOnActor, boolean spawning, Function<Object, R> validationFunction) {
         this.system = actorSystemInstance(spawning);
         this.result = new ArrayList<>(1);
         this.result.add(null);
-        this.mockers = new LinkedList<>();
-        this.callbackActor = callbackActor;
+        this.mocks = new LinkedList<>();
+        this.validateOnActor = validateOnActor;
         this.validationFunction = validationFunction;
     }
 
@@ -67,7 +66,7 @@ public class ActorTestBuilder<R> {
      */
     public ActorTestBuilder<R> mock(Class<?> actor,
                                     BiConsumer<ActorSystemInstance, Message> onMessageReceived) {
-        mockers.add(mockActorAndOnMessageReceived(actor, onMessageReceived));
+        mocks.add(mockActorAndOnMessageReceived(actor, onMessageReceived));
         return this;
     }
 
@@ -77,15 +76,6 @@ public class ActorTestBuilder<R> {
         return Pair.<Class<?>, Consumer<Message>>with(actor, Curry.toConsumer(onMessageReceived, system));
     }
 
-    /**
-     * prepare a {@link Message} to run the Unit test
-     *
-     * @param messageId the message ID
-     * @return a {@link ActorsTestMessageBuilder} to handle creating a {@link Message}
-     */
-    public ActorsTestMessageBuilder<R> createMessage(int messageId) {
-        return new ActorsTestMessageBuilder<>(this, messageId);
-    }
-
+    abstract void registerActors(Class<?> targetActor) throws Exception;
 
 }

@@ -19,38 +19,106 @@ import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by Ahmed Adel Ismail on 3/3/2018.
- */
 public class ActorsTestRunnerTest {
 
     @Test
-    public void foo() throws Exception {
+    public void withResponseWithNoMockingThenReturnInValidCommunication() throws Exception {
 
         ActorsTestRunner
-                .expect(CallbackActor.class, new Function<Message, Integer>() {
+                .withResponse(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
+                        System.out.println("MOCKED CALLBACK : " + message.getId());
+                        return message.getId();
+                    }
+                })
+                .createMessage(1)
+                .sendTo(TargetActor.class)
+                .validate(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        assertNull(integer);
+                    }
+                });
+
+
+    }
+
+    @Test
+    public void withResponseWithMockingThenReturnValidMockedCommunication() throws Exception {
+
+        ActorsTestRunner
+                .withResponse(CallbackActor.class, new Function<Message, Integer>() {
+                    @Override
+                    public Integer apply(Message message) throws Exception {
+                        System.out.println("MOCKED CALLBACK : " + message.getId());
                         return message.getId();
                     }
                 })
                 .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
                     @Override
                     public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
                         actorSystemInstance.send(3, TargetActor.class);
                     }
                 })
                 .createMessage(1)
-                .withReceiverActor(TargetActor.class)
-                .assertResult(new Consumer<Integer>() {
+                .sendTo(TargetActor.class)
+                .validate(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         assertTrue(integer.equals(3));
                     }
                 });
-
-
     }
+
+
+//    @Test
+//    public void withUpdateWithNoMocksThenUpdateTheActorWithTheReceivedMessage() throws Exception {
+//        ActorsTestRunner
+//                .withUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
+//                    @Override
+//                    public Integer apply(TargetActor actor) throws Exception {
+//                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+//                        return actor.message.getId();
+//                    }
+//                })
+//                .createMessage(1)
+//                .send()
+//                .validate(new Consumer<Integer>() {
+//                    @Override
+//                    public void accept(Integer integer) throws Exception {
+//                        assertTrue(integer.equals(1));
+//                    }
+//                });
+//    }
+//
+//    @Test
+//    public void withUpdateWithMocksThenUpdateTheActorWithTheMockedMessage() throws Exception {
+//        ActorsTestRunner
+//                .withUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
+//                    @Override
+//                    public Integer apply(TargetActor actor) throws Exception {
+//                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+//                        return actor.message.getId();
+//                    }
+//                })
+//                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
+//                    @Override
+//                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+//                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
+//                        actorSystemInstance.send(3, TargetActor.class);
+//                    }
+//                })
+//                .createMessage(1)
+//                .send()
+//                .validate(new Consumer<Integer>() {
+//                    @Override
+//                    public void accept(Integer integer) throws Exception {
+//                        assertTrue(integer.equals(3));
+//                    }
+//                });
+//    }
 
 }
 
@@ -83,17 +151,20 @@ class CallbackActor implements Actor, OnActorUnregistered {
 }
 
 
-@Spawn(DependencyActor.class)
+@Spawn({DependencyActor.class, DependencyTwoActor.class})
 class TargetActor implements Actor {
+
+    Message message;
 
     public TargetActor() {
     }
 
     @Override
     public void onMessageReceived(Message message) {
+        this.message = message;
         System.out.println("TargetActor : " + message.getId());
         if (message.getId() == 1) {
-            ActorSystem.send(1, DependencyActor.class);
+            ActorSystem.send(1, DependencyActor.class, DependencyTwoActor.class);
         } else {
             ActorSystem.send(message.getId(), CallbackActor.class);
         }
@@ -117,6 +188,23 @@ class DependencyActor implements Actor {
     public void onMessageReceived(Message message) {
         System.out.println("DependencyActor : " + message.getId());
         ActorSystem.send(2, TargetActor.class);
+    }
+
+    @NonNull
+    @Override
+    public Scheduler observeOnScheduler() {
+        return Schedulers.computation();
+    }
+}
+
+class DependencyTwoActor implements Actor {
+
+    public DependencyTwoActor() {
+    }
+
+    @Override
+    public void onMessageReceived(Message message) {
+        System.out.println("DependencyTwoActor : " + message.getId());
     }
 
     @NonNull

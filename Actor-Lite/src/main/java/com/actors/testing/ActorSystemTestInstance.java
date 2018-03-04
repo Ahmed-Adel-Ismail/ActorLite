@@ -74,4 +74,11 @@ public class ActorSystemTestInstance extends ActorSystemInstance {
             Object actor, Scheduler observeOn, Consumer<Message> onMessageReceived) {
         return super.defaultMailboxBuilder(actor, testScheduler, onMessageReceived);
     }
+
+    void clear() {
+        instances.put(null, null);
+        mailboxes.clear();
+        actorsDisposables.clear();
+        actorsInjector.clear();
+    }
 }
