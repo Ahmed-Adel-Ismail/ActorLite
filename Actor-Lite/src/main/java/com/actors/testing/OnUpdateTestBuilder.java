@@ -10,6 +10,8 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 
 /**
+ * a class that handles building the unit test environment
+ * <p>
  * Created by Ahmed Adel Ismail on 3/4/2018.
  */
 public class OnUpdateTestBuilder<R> extends ActorTestBuilder<R> {

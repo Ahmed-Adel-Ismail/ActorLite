@@ -20,7 +20,7 @@ import io.reactivex.schedulers.TestScheduler;
  * Created by Ahmed Adel Ismail on 3/3/2018.
  */
 @SuppressWarnings("deprecation")
-public class ActorSystemTestInstance extends ActorSystemInstance {
+class ActorSystemTestInstance extends ActorSystemInstance {
 
     private final long id = (long) (Math.random() * 10000);
     final TestScheduler testScheduler = new TestScheduler();
