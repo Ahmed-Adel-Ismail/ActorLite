@@ -25,9 +25,8 @@ class OnUpdateTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
     }
 
     /**
-     * send the message to the target Actor that will be updated
-     *
-     * @return a {@link ActorsTestAssertion} to handle sending the message
+     * send the message to the target Actor that will be updated, and run the assertion for
+     * it's update
      */
     public void run(Consumer<R> assertion) throws Exception {
         new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor),
