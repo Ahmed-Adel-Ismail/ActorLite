@@ -1,8 +1,9 @@
 package com.actors.testing;
 
 import com.actors.Actor;
+import com.actors.ActorSystem;
+import com.actors.ActorSystemGlobalConfiguration;
 import com.actors.Message;
-import com.actors.R;
 
 import io.reactivex.functions.Function;
 
@@ -13,8 +14,24 @@ import io.reactivex.functions.Function;
  */
 public class ActorsTestRunner {
 
-    private ActorsTestRunner() {
+    static {
+        ActorSystemGlobalConfiguration.setTestingMode(true);
+    }
 
+    private final boolean spawning;
+
+    private ActorsTestRunner(boolean spawning) {
+        this.spawning = spawning;
+    }
+
+    /**
+     * initialize an {@link ActorsTestRunner} with spawning feature enabled / disabled
+     *
+     * @param spawning weather the {@link ActorSystem} should spawn Actors or not for this test runner
+     * @return a {@link ActorsTestRunner}
+     */
+    public static ActorsTestRunner withSpawning(boolean spawning) {
+        return new ActorsTestRunner(spawning);
     }
 
     /**
@@ -26,9 +43,9 @@ public class ActorsTestRunner {
      * @param <R>                     the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public static <R> OnResponseTestBuilder<R> withResponse(
+    public <R> OnResponseTestBuilder<R> assertResponse(
             Class<? extends Actor> waitingForResponseActor, Function<Message, R> onMessageReceived) {
-        return new OnResponseTestBuilder<>(waitingForResponseActor, false, onMessageReceived);
+        return new OnResponseTestBuilder<>(waitingForResponseActor, spawning, onMessageReceived);
     }
 
     /**
@@ -40,9 +57,9 @@ public class ActorsTestRunner {
      * @param <R>                  the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public static <T extends Actor, R> OnUpdateTestBuilder<R> withUpdate(
+    public <T extends Actor, R> OnUpdateTestBuilder<R> assertUpdate(
             Class<? extends Actor> targetActor, Function<T, R> onTargetActorUpdated) {
-        return new OnUpdateTestBuilder<>(targetActor, false, onTargetActorUpdated);
+        return new OnUpdateTestBuilder<>(targetActor, spawning, onTargetActorUpdated);
     }
 
 

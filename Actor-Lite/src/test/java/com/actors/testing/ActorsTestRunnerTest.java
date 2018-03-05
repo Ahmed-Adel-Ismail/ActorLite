@@ -24,8 +24,8 @@ public class ActorsTestRunnerTest {
     @Test
     public void withResponseWithNoMockingThenReturnInValidCommunication() throws Exception {
 
-        ActorsTestRunner
-                .withResponse(CallbackActor.class, new Function<Message, Integer>() {
+        ActorsTestRunner.withSpawning(false)
+                .assertResponse(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
                         System.out.println("MOCKED CALLBACK : " + message.getId());
@@ -47,8 +47,8 @@ public class ActorsTestRunnerTest {
     @Test
     public void withResponseWithMockingThenReturnValidMockedCommunication() throws Exception {
 
-        ActorsTestRunner
-                .withResponse(CallbackActor.class, new Function<Message, Integer>() {
+        ActorsTestRunner.withSpawning(false)
+                .assertResponse(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
                         System.out.println("MOCKED CALLBACK : " + message.getId());
@@ -73,52 +73,53 @@ public class ActorsTestRunnerTest {
     }
 
 
-//    @Test
-//    public void withUpdateWithNoMocksThenUpdateTheActorWithTheReceivedMessage() throws Exception {
-//        ActorsTestRunner
-//                .withUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
-//                    @Override
-//                    public Integer apply(TargetActor actor) throws Exception {
-//                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
-//                        return actor.message.getId();
-//                    }
-//                })
-//                .createMessage(1)
-//                .send()
-//                .validate(new Consumer<Integer>() {
-//                    @Override
-//                    public void accept(Integer integer) throws Exception {
-//                        assertTrue(integer.equals(1));
-//                    }
-//                });
-//    }
-//
-//    @Test
-//    public void withUpdateWithMocksThenUpdateTheActorWithTheMockedMessage() throws Exception {
-//        ActorsTestRunner
-//                .withUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
-//                    @Override
-//                    public Integer apply(TargetActor actor) throws Exception {
-//                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
-//                        return actor.message.getId();
-//                    }
-//                })
-//                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
-//                    @Override
-//                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
-//                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
-//                        actorSystemInstance.send(3, TargetActor.class);
-//                    }
-//                })
-//                .createMessage(1)
-//                .send()
-//                .validate(new Consumer<Integer>() {
-//                    @Override
-//                    public void accept(Integer integer) throws Exception {
-//                        assertTrue(integer.equals(3));
-//                    }
-//                });
-//    }
+    @Test
+    public void withUpdateWithNoMocksThenUpdateTheActorWithTheReceivedMessage() throws Exception {
+        ActorsTestRunner.withSpawning(false)
+                .assertUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
+                    @Override
+                    public Integer apply(TargetActor actor) throws Exception {
+                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+                        return actor.message.getId();
+                    }
+                })
+                .createMessage(1)
+                .send()
+                .validate(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        assertTrue(integer.equals(1));
+                    }
+                });
+    }
+
+    @Test
+    public void withUpdateWithMocksThenUpdateTheActorWithTheMockedMessage() throws Exception {
+
+        ActorsTestRunner.withSpawning(false)
+                .assertUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
+                    @Override
+                    public Integer apply(TargetActor actor) throws Exception {
+                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+                        return actor.message.getId();
+                    }
+                })
+                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
+                    @Override
+                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
+                        actorSystemInstance.send(3, TargetActor.class);
+                    }
+                })
+                .createMessage(1)
+                .send()
+                .validate(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        assertTrue(integer.equals(3));
+                    }
+                });
+    }
 
 }
 

@@ -30,12 +30,11 @@ public class ActorSystemInstance {
 
     protected static final Map<Object, ActorSystemInstance> instances = new LinkedHashMap<>();
     private static final int MAILBOX_CAPACITY = 10;
-
-    private final Object lock;
     protected final TypedMap<ReplaySubject<Message>> mailboxes;
     protected final TypedMap<Disposable> actorsDisposables;
     protected final ActorsInjector actorsInjector;
     protected final ActorSystemConfiguration configuration;
+    private final Object lock;
 
 
     protected ActorSystemInstance() {
@@ -110,10 +109,28 @@ public class ActorSystemInstance {
      * @param message the {@link Message} object
      * @param actors  the actor (or group of actors) that will receive this message
      */
-    public void send(final Message message, @NonNull Class<?>... actors) {
+    public void send(final Message message, @NonNull final Class<?>... actors) {
         if (actors.length == 0) {
             throw new UnsupportedOperationException("no Actors passed to the parameters");
         }
+        if (ActorSystemGlobalConfiguration.isTestingMode()) {
+            doSendMessagesForAllInstances(message, actors);
+        } else {
+            doSendMessage(message, actors);
+        }
+    }
+
+    private void doSendMessagesForAllInstances(final Message message, @NonNull final Class<?>[] actors) {
+        Observable.fromIterable(instances.values())
+                .blockingSubscribe(new Consumer<ActorSystemInstance>() {
+                    @Override
+                    public void accept(ActorSystemInstance actorSystemInstance) throws Exception {
+                        actorSystemInstance.doSendMessage(message, actors);
+                    }
+                });
+    }
+
+    private void doSendMessage(Message message, @NonNull Class<?>[] actors) {
         Observable.fromArray(actors)
                 .flatMap(toMailboxMaybe())
                 .blockingSubscribe(invokeMailboxOnNext(message), printStackTrace());

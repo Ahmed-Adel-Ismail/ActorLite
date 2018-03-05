@@ -3,9 +3,10 @@ package com.actors;
 import android.support.annotation.RestrictTo;
 
 /**
+ * a class that holds the configurations for the Actor-System
+ * <p>
  * Created by Ahmed Adel Ismail on 2/27/2018.
  */
-
 public class ActorSystemConfiguration {
 
     final boolean spawnActors;

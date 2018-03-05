@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.actors.Actor;
 import com.actors.ActorScheduler;
 import com.actors.ActorSystem;
+import com.actors.ActorSystemGlobalConfiguration;
 import com.actors.Message;
 
 import io.reactivex.Scheduler;

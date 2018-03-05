@@ -22,18 +22,16 @@ import io.reactivex.schedulers.TestScheduler;
 @SuppressWarnings("deprecation")
 public class ActorSystemTestInstance extends ActorSystemInstance {
 
+    private final long id = (long) (Math.random() * 10000);
     final TestScheduler testScheduler = new TestScheduler();
     private final Set<Class<?>> testActors = new LinkedHashSet<>();
 
 
     ActorSystemTestInstance(ActorSystemConfiguration configuration) {
         super(configuration);
-        replaceTheDefaultActorSystem();
+        instances.put(id,this);
     }
 
-    private void replaceTheDefaultActorSystem() {
-        instances.put(null, this);
-    }
 
     @Override
     protected void doRegister(Object actor, Consumer<MailboxBuilder> mailboxBuilderFunction) {
@@ -76,9 +74,9 @@ public class ActorSystemTestInstance extends ActorSystemInstance {
     }
 
     void clear() {
-        instances.put(null, null);
         mailboxes.clear();
         actorsDisposables.clear();
         actorsInjector.clear();
+        instances.remove(id);
     }
 }
