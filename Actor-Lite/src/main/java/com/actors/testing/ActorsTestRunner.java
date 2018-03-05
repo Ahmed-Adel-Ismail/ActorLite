@@ -1,10 +1,13 @@
 package com.actors.testing;
 
+import android.support.annotation.RestrictTo;
+
 import com.actors.Actor;
 import com.actors.ActorSystem;
 import com.actors.ActorSystemGlobalConfiguration;
 import com.actors.Message;
 
+import io.reactivex.annotations.Experimental;
 import io.reactivex.functions.Function;
 
 /**
@@ -29,9 +32,20 @@ public class ActorsTestRunner {
      *
      * @param spawning weather the {@link ActorSystem} should spawn Actors or not for this test runner
      * @return a {@link ActorsTestRunner}
+     * @deprecated Unit testing is still not stable when spawning is not enabled
      */
+    @Experimental
     public static ActorsTestRunner withSpawning(boolean spawning) {
         return new ActorsTestRunner(spawning);
+    }
+
+    /**
+     * initialize an {@link ActorsTestRunner} with spawning feature disabled
+     *
+     * @return a {@link ActorsTestRunner}
+     */
+    public static ActorsTestRunner withSpawningDisabled() {
+        return new ActorsTestRunner(false);
     }
 
     /**

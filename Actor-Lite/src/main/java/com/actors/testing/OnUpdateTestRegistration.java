@@ -17,7 +17,8 @@ class OnUpdateTestRegistration<R> implements BiConsumer<Class<?>, ActorTestBuild
         registerTargetUpdatableActor(targetActor, builder);
     }
 
-    private void registerTargetUpdatableActor(Class<?> targetActor, ActorTestBuilder<R> builder) throws Exception {
+    private void registerTargetUpdatableActor(Class<?> targetActor, ActorTestBuilder<R> builder)
+            throws Exception {
         builder.system.register(targetActor,
                 builder.system.testScheduler, invokeOnMessageReceived(targetActor, builder));
     }
