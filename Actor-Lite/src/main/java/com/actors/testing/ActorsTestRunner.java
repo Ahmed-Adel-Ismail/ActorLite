@@ -21,31 +21,8 @@ public class ActorsTestRunner {
         ActorSystemGlobalConfiguration.setTestingMode(true);
     }
 
-    private final boolean spawning;
+    private ActorsTestRunner() {
 
-    private ActorsTestRunner(boolean spawning) {
-        this.spawning = spawning;
-    }
-
-    /**
-     * initialize an {@link ActorsTestRunner} with spawning feature enabled / disabled
-     *
-     * @param spawning weather the {@link ActorSystem} should spawn Actors or not for this test runner
-     * @return a {@link ActorsTestRunner}
-     * @deprecated Unit testing is still not stable when spawning is not enabled
-     */
-    @Experimental
-    public static ActorsTestRunner withSpawning(boolean spawning) {
-        return new ActorsTestRunner(spawning);
-    }
-
-    /**
-     * initialize an {@link ActorsTestRunner} with spawning feature disabled
-     *
-     * @return a {@link ActorsTestRunner}
-     */
-    public static ActorsTestRunner withSpawningDisabled() {
-        return new ActorsTestRunner(false);
     }
 
     /**
@@ -57,9 +34,9 @@ public class ActorsTestRunner {
      * @param <R>                     the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public <R> OnResponseTestBuilder<R> assertReply(
+    public static <R> OnResponseTestBuilder<R> assertReply(
             Class<? extends Actor> waitingForResponseActor, Function<Message, R> onMessageReceived) {
-        return new OnResponseTestBuilder<>(waitingForResponseActor, spawning, onMessageReceived);
+        return new OnResponseTestBuilder<>(waitingForResponseActor, false, onMessageReceived);
     }
 
     /**
@@ -71,9 +48,9 @@ public class ActorsTestRunner {
      * @param <R>                  the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public <T extends Actor, R> OnUpdateTestBuilder<R> assertUpdate(
+    public static <T extends Actor, R> OnUpdateTestBuilder<R> assertUpdate(
             Class<? extends Actor> targetActor, Function<T, R> onTargetActorUpdated) {
-        return new OnUpdateTestBuilder<>(targetActor, spawning, onTargetActorUpdated);
+        return new OnUpdateTestBuilder<>(targetActor, false, onTargetActorUpdated);
     }
 
 

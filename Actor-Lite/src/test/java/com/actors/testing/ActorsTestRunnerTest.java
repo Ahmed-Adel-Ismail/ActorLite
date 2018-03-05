@@ -23,7 +23,7 @@ public class ActorsTestRunnerTest {
 
     @Test
     public void assertReplyWithNoSpawningAndNoMockingThenReturnInValidCommunication() throws Exception {
-        ActorsTestRunner.withSpawning(false)
+        ActorsTestRunner
                 .assertReply(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
@@ -43,7 +43,7 @@ public class ActorsTestRunnerTest {
 
     @Test
     public void assertReplyWithNoSpawningAndWithMockingThenReturnValidMockedCommunication() throws Exception {
-        ActorsTestRunner.withSpawning(false)
+        ActorsTestRunner
                 .assertReply(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
@@ -71,7 +71,7 @@ public class ActorsTestRunnerTest {
 
     @Test
     public void assertUpdateWithNoSpawningAndWithNoMocksThenUpdateTheActorWithTheReceivedMessage() throws Exception {
-        ActorsTestRunner.withSpawning(false)
+        ActorsTestRunner
                 .assertUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
                     @Override
                     public Integer apply(TargetActor actor) throws Exception {
@@ -90,7 +90,7 @@ public class ActorsTestRunnerTest {
 
     @Test
     public void assertUpdateWithNoSpawningAndWithMockingThenUpdateTheActorWithTheMockedMessage() throws Exception {
-        ActorsTestRunner.withSpawning(false)
+        ActorsTestRunner
                 .assertUpdate(TargetActor.class, new Function<TargetActor, Integer>() {
                     @Override
                     public Integer apply(TargetActor actor) throws Exception {
@@ -114,52 +114,52 @@ public class ActorsTestRunnerTest {
                 });
     }
 
-    @Test
-    public void assertReplyWithSpawningAndNoMockingThenReturnInValidCommunication() throws Exception {
-        ActorsTestRunner.withSpawning(true)
-                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
-                    @Override
-                    public Integer apply(Message message) throws Exception {
-                        System.out.println("MOCKED CALLBACK : " + message.getId());
-                        return message.getId();
-                    }
-                })
-                .sendMessage(1)
-                .forActor(TargetActor.class)
-                .run(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer integer) throws Exception {
-                        assertTrue(integer.equals(2));
-                    }
-                });
-    }
-
-    @Test
-    public void assertReplyWithSpawningAndWithMockingThenReturnValidMockedCommunication() throws Exception {
-        ActorsTestRunner.withSpawning(true)
-                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
-                    @Override
-                    public Integer apply(Message message) throws Exception {
-                        System.out.println("MOCKED CALLBACK : " + message.getId());
-                        return message.getId();
-                    }
-                })
-                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
-                    @Override
-                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
-                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
-                        actorSystemInstance.send(3, TargetActor.class);
-                    }
-                })
-                .sendMessage(1)
-                .forActor(TargetActor.class)
-                .run(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer integer) throws Exception {
-                        assertTrue(integer.equals(3));
-                    }
-                });
-    }
+//    @Test
+//    public void assertReplyWithSpawningAndNoMockingThenReturnInValidCommunication() throws Exception {
+//        ActorsTestRunner.withSpawning(true)
+//                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
+//                    @Override
+//                    public Integer apply(Message message) throws Exception {
+//                        System.out.println("MOCKED CALLBACK : " + message.getId());
+//                        return message.getId();
+//                    }
+//                })
+//                .sendMessage(1)
+//                .forActor(TargetActor.class)
+//                .run(new Consumer<Integer>() {
+//                    @Override
+//                    public void accept(Integer integer) throws Exception {
+//                        assertTrue(integer.equals(2));
+//                    }
+//                });
+//    }
+//
+//    @Test
+//    public void assertReplyWithSpawningAndWithMockingThenReturnValidMockedCommunication() throws Exception {
+//        ActorsTestRunner.withSpawning(true)
+//                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
+//                    @Override
+//                    public Integer apply(Message message) throws Exception {
+//                        System.out.println("MOCKED CALLBACK : " + message.getId());
+//                        return message.getId();
+//                    }
+//                })
+//                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
+//                    @Override
+//                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+//                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
+//                        actorSystemInstance.send(3, TargetActor.class);
+//                    }
+//                })
+//                .sendMessage(1)
+//                .forActor(TargetActor.class)
+//                .run(new Consumer<Integer>() {
+//                    @Override
+//                    public void accept(Integer integer) throws Exception {
+//                        assertTrue(integer.equals(3));
+//                    }
+//                });
+//    }
 
 
 //    @Test
