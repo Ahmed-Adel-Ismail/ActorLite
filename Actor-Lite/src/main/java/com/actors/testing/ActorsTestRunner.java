@@ -43,7 +43,7 @@ public class ActorsTestRunner {
      * @param <R>                     the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public <R> OnResponseTestBuilder<R> assertResponse(
+    public <R> OnResponseTestBuilder<R> assertReply(
             Class<? extends Actor> waitingForResponseActor, Function<Message, R> onMessageReceived) {
         return new OnResponseTestBuilder<>(waitingForResponseActor, spawning, onMessageReceived);
     }

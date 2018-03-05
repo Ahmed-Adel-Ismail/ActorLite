@@ -2,6 +2,8 @@ package com.actors.testing;
 
 import com.actors.Message;
 
+import io.reactivex.functions.Consumer;
+
 /**
  * Created by Ahmed Adel Ismail on 3/4/2018.
  */
@@ -27,8 +29,9 @@ class OnUpdateTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
      *
      * @return a {@link ActorsTestAssertion} to handle sending the message
      */
-    public ActorsTestAssertion<R> send() {
-        return new ActorsTestAssertion<>(testBuilder,
-                new Message(id, content, replyToActor), testBuilder.validateOnActor);
+    public void run(Consumer<R> assertion) throws Exception {
+        new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor),
+                testBuilder.validateOnActor)
+                .run(assertion);
     }
 }

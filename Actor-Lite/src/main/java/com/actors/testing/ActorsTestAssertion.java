@@ -33,7 +33,7 @@ public class ActorsTestAssertion<R> {
      * @param assertion the assertion function
      * @throws Exception if the assertion function threw an {@link Exception}
      */
-    public void validate(Consumer<R> assertion) throws Exception {
+    public void run(Consumer<R> assertion) throws Exception {
         testBuilder.registerActors(targetActor);
         system.send(message, targetActor);
         system.testScheduler.triggerActions();

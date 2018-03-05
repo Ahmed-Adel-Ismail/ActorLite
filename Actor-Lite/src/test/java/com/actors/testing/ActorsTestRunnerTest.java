@@ -25,16 +25,16 @@ public class ActorsTestRunnerTest {
     public void withResponseWithNoMockingThenReturnInValidCommunication() throws Exception {
 
         ActorsTestRunner.withSpawning(false)
-                .assertResponse(CallbackActor.class, new Function<Message, Integer>() {
+                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
                         System.out.println("MOCKED CALLBACK : " + message.getId());
                         return message.getId();
                     }
                 })
-                .createMessage(1)
-                .sendTo(TargetActor.class)
-                .validate(new Consumer<Integer>() {
+                .sendMessage(1)
+                .forActor(TargetActor.class)
+                .run(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         assertNull(integer);
@@ -48,7 +48,7 @@ public class ActorsTestRunnerTest {
     public void withResponseWithMockingThenReturnValidMockedCommunication() throws Exception {
 
         ActorsTestRunner.withSpawning(false)
-                .assertResponse(CallbackActor.class, new Function<Message, Integer>() {
+                .assertReply(CallbackActor.class, new Function<Message, Integer>() {
                     @Override
                     public Integer apply(Message message) throws Exception {
                         System.out.println("MOCKED CALLBACK : " + message.getId());
@@ -62,9 +62,9 @@ public class ActorsTestRunnerTest {
                         actorSystemInstance.send(3, TargetActor.class);
                     }
                 })
-                .createMessage(1)
-                .sendTo(TargetActor.class)
-                .validate(new Consumer<Integer>() {
+                .sendMessage(1)
+                .forActor(TargetActor.class)
+                .run(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         assertTrue(integer.equals(3));
@@ -83,9 +83,8 @@ public class ActorsTestRunnerTest {
                         return actor.message.getId();
                     }
                 })
-                .createMessage(1)
-                .send()
-                .validate(new Consumer<Integer>() {
+                .sendMessage(1)
+                .run(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         assertTrue(integer.equals(1));
@@ -111,9 +110,8 @@ public class ActorsTestRunnerTest {
                         actorSystemInstance.send(3, TargetActor.class);
                     }
                 })
-                .createMessage(1)
-                .send()
-                .validate(new Consumer<Integer>() {
+                .sendMessage(1)
+                .run(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         assertTrue(integer.equals(3));

@@ -29,7 +29,7 @@ public class OnResponseTestMessageBuilder<R> extends ActorsTestMessageBuilder<R>
      * @param actor the Actor that will receive the {@link Message}
      * @return a {@link ActorsTestAssertion} to handle sending the message
      */
-    public ActorsTestAssertion<R> sendTo(Class<?> actor) {
+    public ActorsTestAssertion<R> forActor(Class<?> actor) {
         return new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor), actor);
     }
 }

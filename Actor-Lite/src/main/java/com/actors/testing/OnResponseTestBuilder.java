@@ -41,7 +41,7 @@ public class OnResponseTestBuilder<R> extends ActorTestBuilder<R> {
      * @param messageId the message ID
      * @return a {@link ActorsTestMessageBuilder} to handle creating a {@link Message}
      */
-    public OnResponseTestMessageBuilder<R> createMessage(int messageId) {
+    public OnResponseTestMessageBuilder<R> sendMessage(int messageId) {
         return new OnResponseTestMessageBuilder<>(this, messageId);
     }
 
