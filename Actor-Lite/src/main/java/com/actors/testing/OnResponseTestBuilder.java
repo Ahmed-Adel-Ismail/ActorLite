@@ -2,6 +2,7 @@ package com.actors.testing;
 
 import android.support.annotation.NonNull;
 
+import com.actors.Actor;
 import com.actors.ActorSystemInstance;
 import com.actors.Message;
 
@@ -15,8 +16,13 @@ import io.reactivex.functions.Function;
  */
 public class OnResponseTestBuilder<R> extends ActorTestBuilder<R> {
 
-    OnResponseTestBuilder(Class<?> callbackActor, boolean spawning, final Function<Message, R> validationFunction) {
-        super(callbackActor, spawning, messageValidationFunction(validationFunction));
+    private final Class<? extends Actor> targetActor;
+
+    OnResponseTestBuilder(Class<?> callbackActor,
+                          Class<? extends Actor> targetActor,
+                          Function<Message, R> validationFunction) {
+        super(callbackActor, messageValidationFunction(validationFunction));
+        this.targetActor = targetActor;
     }
 
     @NonNull
@@ -42,7 +48,7 @@ public class OnResponseTestBuilder<R> extends ActorTestBuilder<R> {
      * @return a {@link ActorsTestMessageBuilder} to handle creating a {@link Message}
      */
     public OnResponseTestMessageBuilder<R> sendMessage(int messageId) {
-        return new OnResponseTestMessageBuilder<>(this, messageId);
+        return new OnResponseTestMessageBuilder<>(this, messageId, targetActor);
     }
 
     @Override

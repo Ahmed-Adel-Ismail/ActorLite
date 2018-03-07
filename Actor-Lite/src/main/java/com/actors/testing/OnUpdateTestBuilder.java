@@ -16,9 +16,9 @@ import io.reactivex.functions.Function;
  */
 public class OnUpdateTestBuilder<R> extends ActorTestBuilder<R> {
 
-    <T extends Actor> OnUpdateTestBuilder(
-            Class<?> callbackActor, boolean spawning, final Function<T, R> validationFunction) {
-        super(callbackActor, spawning, validationActorFunction(validationFunction));
+    <T extends Actor> OnUpdateTestBuilder(Class<?> callbackActor,
+                                          Function<T, R> validationFunction) {
+        super(callbackActor, validationActorFunction(validationFunction));
     }
 
     @NonNull

@@ -1,6 +1,10 @@
 package com.actors.testing;
 
+import com.actors.Actor;
 import com.actors.Message;
+
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
 /**
  * a class that builds the Message for testing the Actors communication
@@ -9,8 +13,13 @@ import com.actors.Message;
  */
 public class OnResponseTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
 
-    OnResponseTestMessageBuilder(ActorTestBuilder<R> testBuilder, int id) {
+    private final Class<? extends Actor> targetActor;
+
+    OnResponseTestMessageBuilder(ActorTestBuilder<R> testBuilder,
+                                 int id,
+                                 Class<? extends Actor> targetActor) {
         super(testBuilder, id);
+        this.targetActor = targetActor;
     }
 
     public OnResponseTestMessageBuilder withContent(Object content) {
@@ -19,17 +28,19 @@ public class OnResponseTestMessageBuilder<R> extends ActorsTestMessageBuilder<R>
     }
 
     public OnResponseTestMessageBuilder withReplyToActor(Class<?> replyToActor) {
-        this.replyToActor = replyToActor;
+        super.withReplyToActor(replyToActor);
         return this;
     }
 
     /**
      * send the message to the passed Actor (which is the target for the Unit-test)
      *
-     * @param actor the Actor that will receive the {@link Message}
-     * @return a {@link ActorsTestAssertion} to handle sending the message
+     * @param assertion a {@link Consumer} that will be passed the value returned by
+     *                  {@link ActorsTestRunner.OnReplyToAddress#captureReply(Function)}
+     *                  to assert on it
      */
-    public ActorsTestAssertion<R> forActor(Class<?> actor) {
-        return new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor), actor);
+    public void assertReply(Consumer<R> assertion) throws Exception {
+        new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor), targetActor)
+                .run(assertion);
     }
 }

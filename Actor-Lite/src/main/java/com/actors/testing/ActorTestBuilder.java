@@ -34,8 +34,8 @@ abstract class ActorTestBuilder<R> {
     final Function<Object, R> validationFunction;
     final List<Pair<Class<?>, Consumer<Message>>> mocks;
 
-    ActorTestBuilder(Class<?> validateOnActor, boolean spawning, Function<Object, R> validationFunction) {
-        this.system = actorSystemInstance(spawning);
+    ActorTestBuilder(Class<?> validateOnActor, Function<Object, R> validationFunction) {
+        this.system = actorSystemInstance(false);
         this.result = new ArrayList<>(1);
         this.result.add(null);
         this.mocks = new LinkedList<>();
