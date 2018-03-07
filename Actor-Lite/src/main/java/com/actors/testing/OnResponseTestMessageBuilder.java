@@ -22,12 +22,12 @@ public class OnResponseTestMessageBuilder<R> extends ActorsTestMessageBuilder<R>
         this.targetActor = targetActor;
     }
 
-    public OnResponseTestMessageBuilder withContent(Object content) {
+    public OnResponseTestMessageBuilder<R> withContent(Object content) {
         super.withContent(content);
         return this;
     }
 
-    public OnResponseTestMessageBuilder withReplyToActor(Class<?> replyToActor) {
+    public OnResponseTestMessageBuilder<R> withReplyToActor(Class<?> replyToActor) {
         super.withReplyToActor(replyToActor);
         return this;
     }

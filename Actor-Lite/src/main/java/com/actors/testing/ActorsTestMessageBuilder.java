@@ -26,7 +26,7 @@ abstract class ActorsTestMessageBuilder<R> {
      * @param content the {@code content} to set
      * @return a reference to this Builder
      */
-    public ActorsTestMessageBuilder withContent(Object content) {
+    public ActorsTestMessageBuilder<R> withContent(Object content) {
         this.content = content;
         return this;
     }
@@ -38,7 +38,7 @@ abstract class ActorsTestMessageBuilder<R> {
      * @param replyToActor the {@code replyToActor} to set
      * @return a reference to this Builder
      */
-    public ActorsTestMessageBuilder withReplyToActor(Class<?> replyToActor) {
+    public ActorsTestMessageBuilder<R> withReplyToActor(Class<?> replyToActor) {
         this.replyToActor = replyToActor;
         return this;
     }

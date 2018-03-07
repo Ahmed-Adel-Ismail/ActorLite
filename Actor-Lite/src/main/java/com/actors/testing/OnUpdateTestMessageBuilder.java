@@ -16,12 +16,12 @@ public class OnUpdateTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
         super(testBuilder, id);
     }
 
-    public OnUpdateTestMessageBuilder withContent(Object content) {
+    public OnUpdateTestMessageBuilder<R> withContent(Object content) {
         super.withContent(content);
         return this;
     }
 
-    public OnUpdateTestMessageBuilder withReplyToActor(Class<?> replyToActor) {
+    public OnUpdateTestMessageBuilder<R> withReplyToActor(Class<?> replyToActor) {
         super.withReplyToActor(replyToActor);
         return this;
     }
