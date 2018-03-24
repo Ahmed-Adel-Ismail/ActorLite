@@ -3,6 +3,7 @@ package com.actors;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 
+import com.actors.agents.AgentsSystem;
 import com.chaining.Chain;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class ActorSystemInstance {
     protected final ActorsInjector actorsInjector;
     protected final ActorSystemConfiguration configuration;
     private final Object lock;
+    private final AgentsSystem agentsSystem;
 
 
     protected ActorSystemInstance() {
@@ -47,6 +49,7 @@ public class ActorSystemInstance {
         this.mailboxes = new TypedMap<>(new LinkedHashMap<Object, ReplaySubject<Message>>());
         this.actorsDisposables = new TypedMap<>(new LinkedHashMap<Object, Disposable>());
         this.actorsInjector = new ActorsInjector(this);
+        this.agentsSystem = new AgentsSystem(this);
 
     }
 
@@ -259,6 +262,8 @@ public class ActorSystemInstance {
         if (configuration.spawnActors) {
             actorsInjector.injectFor(actor);
         }
+
+        agentsSystem.register(actor);
     }
 
     @NonNull
@@ -512,6 +517,7 @@ public class ActorSystemInstance {
                 .defaultIfEmpty(dummyDisposable())
                 .subscribe(invokeDisposeIfNotDisposed(), printStackTrace());
 
+        agentsSystem.unregister(actor);
 
     }
 

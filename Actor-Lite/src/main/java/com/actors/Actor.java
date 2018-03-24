@@ -12,6 +12,8 @@ import io.reactivex.Scheduler;
  */
 public interface Actor {
 
+
+
     /**
      * this method is triggered when a {@link Message} is received from
      * the Mailbox
