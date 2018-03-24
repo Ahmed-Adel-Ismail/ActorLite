@@ -641,7 +641,7 @@ private void handleMessageWithIdOne(ActorSystemInstance actorSystem,Message mess
 
 ```
 
-This is how ActorsTestRunner guarantees isolation of the Actor under testing, it does not create any dependencies for your Actor under test, so if you want to create a dependency, you need to mock it, and it will replaces the Mocks with the real dependencies
+This is how <b>ActorsTestRunner</b> guarantees isolation of the Actor under testing, it does not create any dependencies for your Actor under test, so if you want to create a dependency, you need to mock it, and it will replaces the Mocks with the real dependencies
 
 <b>3- After we made sure that the TargetActor sends a message to it's dependency properly, in the next example, we will test that our TargetActor replies to the CallbackActor properly:</b>
 
@@ -663,9 +663,9 @@ public void sendMessageWithIdTwoThenReceiveMessageWithIdThreeOnCallbackActor()
 
 In this last test, we made sure that when our <b>TargetActor</b> receives a Message with the id "2", it will send another Message to the <b>CallbackActor</b> with the id "3"
 
-Notice that we did not need to mock the <b>CallbackActor</b> to be able to know it it received the message, <b>ActorsTestRunner</b> handles the mocking process for us
+Notice that we did not need to mock the <b>CallbackActor</b> to be able to know it received the message, <b>ActorsTestRunner</b> handles the mocking process for us
 
-With <b>ActorsTestRunner</b>'s DSL, you can hit 90% + test coverage with just few lines, by the way, the Unit test for this <b>TargetActor</b> covers 100% with only 20 kines, no Traditional Mocking or Test-doubles, no Multithreading handling, just 5 or 6 lines per Unit-Test and that's all
+With <b>ActorsTestRunner</b>'s DSL, you can hit 90% + test coverage with just few lines, by the way, the Unit test for this <b>TargetActor</b> covers 100% with only 20 lines, no Traditional Mocking or Test-doubles, no Multithreading handling, just 5 or 6 lines per Unit-Test and that's all
 
 Notice also that you did not need to design your original code for test-ability, as the <b>ActorsTestRunner</b> handles this for you, it switches the production environment with a Testing Environment, and makes a special environment for every Unit-Test, which makes it easy to run the Unit-Tests in Parallel as well
 
