@@ -9,15 +9,17 @@ import io.reactivex.Scheduler;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Consumer;
 
-class OnUpdateTestRegistration<R> implements BiConsumer<Class<?>, ActorTestBuilder<R>> {
+class OnUpdateTestRegistration<T extends Actor, R>
+        implements BiConsumer<Class<? extends T>, ActorTestBuilder<T, T, R>> {
 
     @Override
-    public void accept(final Class<?> targetActor, final ActorTestBuilder<R> builder) throws Exception {
+    public void accept(final Class<? extends T> targetActor, final ActorTestBuilder<T, T, R> builder)
+            throws Exception {
         new MocksRegistration().accept(builder);
         registerTargetUpdatableActor(targetActor, builder);
     }
 
-    private void registerTargetUpdatableActor(Class<?> targetActor, ActorTestBuilder<R> builder)
+    private void registerTargetUpdatableActor(Class<? extends T> targetActor, ActorTestBuilder<T, T, R> builder)
             throws Exception {
         builder.system.register(targetActor,
                 builder.system.testScheduler, invokeOnMessageReceived(targetActor, builder));
@@ -25,10 +27,10 @@ class OnUpdateTestRegistration<R> implements BiConsumer<Class<?>, ActorTestBuild
 
     @NonNull
     private Consumer<Message> invokeOnMessageReceived(
-            final Class<?> targetActor, final ActorTestBuilder<R> builder) throws Exception {
+            final Class<? extends T> targetActor, final ActorTestBuilder<T, T, R> builder) throws Exception {
         return new Consumer<Message>() {
 
-            Actor actor = wrapperActor(targetActor, builder);
+            T actor = wrapperActor(targetActor, builder);
 
             @Override
             public void accept(Message message) throws Exception {
@@ -37,12 +39,13 @@ class OnUpdateTestRegistration<R> implements BiConsumer<Class<?>, ActorTestBuild
         };
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
-    private Actor wrapperActor(final Class<?> targetActor, final ActorTestBuilder<R> builder)
+    private T wrapperActor(final Class<? extends T> targetActor, final ActorTestBuilder<T, T, R> builder)
             throws Exception {
-        return new Actor() {
+        return (T) new Actor() {
 
-            final Actor originalActor = new ActorInitializer().apply(targetActor);
+            final T originalActor = new ActorInitializer<>(builder.preparations).apply(targetActor);
 
             @Override
             public void onMessageReceived(Message message) {

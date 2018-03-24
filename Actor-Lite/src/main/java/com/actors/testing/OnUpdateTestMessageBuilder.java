@@ -1,5 +1,6 @@
 package com.actors.testing;
 
+import com.actors.Actor;
 import com.actors.Message;
 
 import io.reactivex.functions.Consumer;
@@ -10,20 +11,26 @@ import io.reactivex.functions.Function;
  * <p>
  * Created by Ahmed Adel Ismail on 3/4/2018.
  */
-public class OnUpdateTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
+public class OnUpdateTestMessageBuilder<T extends Actor, R> extends ActorsTestMessageBuilder<T, T, R> {
 
-    OnUpdateTestMessageBuilder(ActorTestBuilder<R> testBuilder, int id) {
+    OnUpdateTestMessageBuilder(ActorTestBuilder<T, T, R> testBuilder, int id) {
         super(testBuilder, id);
     }
 
-    public OnUpdateTestMessageBuilder<R> withContent(Object content) {
+    public OnUpdateTestMessageBuilder<T, R> withContent(Object content) {
         super.withContent(content);
         return this;
     }
 
-    public OnUpdateTestMessageBuilder<R> withReplyToActor(Class<?> replyToActor) {
+    public OnUpdateTestMessageBuilder<T, R> withReplyToActor(Class<?> replyToActor) {
         super.withReplyToActor(replyToActor);
         return this;
+    }
+
+    public R getUpdate() throws Exception {
+        return new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor),
+                testBuilder.validateOnActor)
+                .getResult();
     }
 
     /**

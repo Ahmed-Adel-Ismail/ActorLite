@@ -4,28 +4,29 @@ import android.support.annotation.NonNull;
 
 import com.actors.Actor;
 import com.actors.Message;
+import com.actors.R;
 
-import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Consumer;
 
-class OnResponseTestRegistrations<R> implements BiConsumer<Class<?>, ActorTestBuilder<R>> {
+class OnResponseTestRegistrations<T extends Actor, V extends Actor, R>
+        implements BiConsumer<Class<? extends T>, ActorTestBuilder<T, V, R>> {
 
     @Override
-    public void accept(Class<?> targetActor, ActorTestBuilder<R> builder) throws Exception {
+    public void accept(Class<? extends T> targetActor, ActorTestBuilder<T, V, R> builder) throws Exception {
         new MocksRegistration().accept(builder);
         registerValidateOnActor(builder);
         registerTargetActor(builder, targetActor);
     }
 
-    private void registerValidateOnActor(ActorTestBuilder<R> builder) throws Exception {
+    private void registerValidateOnActor(ActorTestBuilder<T, V, R> builder) throws Exception {
         builder.system.register(builder.validateOnActor,
                 builder.system.testScheduler, updateResultOnMessageReceived(builder));
     }
 
-    private void registerTargetActor(ActorTestBuilder<R> builder, final Class<?> targetActor)
+    private void registerTargetActor(ActorTestBuilder<T, V, R> builder, final Class<? extends T> targetActor)
             throws Exception {
-        final Actor actor = new ActorInitializer().apply(targetActor);
+        final T actor = new ActorInitializer<>(builder.preparations).apply(targetActor);
         builder.system.register(actor, builder.system.testScheduler, new Consumer<Message>() {
             @Override
             public void accept(Message message) throws Exception {
@@ -35,7 +36,7 @@ class OnResponseTestRegistrations<R> implements BiConsumer<Class<?>, ActorTestBu
     }
 
     @NonNull
-    private Consumer<Message> updateResultOnMessageReceived(final ActorTestBuilder<R> testBuilder) {
+    private Consumer<Message> updateResultOnMessageReceived(final ActorTestBuilder<T, V, R> testBuilder) {
         return new Consumer<Message>() {
             @Override
             public void accept(Message message) throws Exception {

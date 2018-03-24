@@ -7,6 +7,7 @@ import com.actors.ActorSystemInstance;
 import com.actors.Message;
 
 import io.reactivex.functions.BiConsumer;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 /**
@@ -14,10 +15,9 @@ import io.reactivex.functions.Function;
  * <p>
  * Created by Ahmed Adel Ismail on 3/4/2018.
  */
-public class OnUpdateTestBuilder<R> extends ActorTestBuilder<R> {
+public class OnUpdateTestBuilder<T extends Actor, R> extends ActorTestBuilder<T, T, R> {
 
-    <T extends Actor> OnUpdateTestBuilder(Class<?> callbackActor,
-                                          Function<T, R> validationFunction) {
+    OnUpdateTestBuilder(Class<? extends T> callbackActor, Function<T, R> validationFunction) {
         super(callbackActor, validationActorFunction(validationFunction));
     }
 
@@ -34,9 +34,15 @@ public class OnUpdateTestBuilder<R> extends ActorTestBuilder<R> {
     }
 
     @Override
-    public OnUpdateTestBuilder<R> mock(
+    public OnUpdateTestBuilder<T, R> mock(
             Class<?> actor, BiConsumer<ActorSystemInstance, Message> onMessageReceived) {
         super.mock(actor, onMessageReceived);
+        return this;
+    }
+
+    @Override
+    public OnUpdateTestBuilder<T, R> prepare(Consumer<T> preparation) {
+        super.prepare(preparation);
         return this;
     }
 
@@ -46,14 +52,14 @@ public class OnUpdateTestBuilder<R> extends ActorTestBuilder<R> {
      * @param messageId the message ID
      * @return a {@link ActorsTestMessageBuilder} to handle creating a {@link Message}
      */
-    public OnUpdateTestMessageBuilder<R> sendMessage(int messageId) {
+    public OnUpdateTestMessageBuilder<T, R> sendMessage(int messageId) {
         return new OnUpdateTestMessageBuilder<>(this, messageId);
     }
 
 
     @Override
-    void registerActors(Class<?> targetActor) throws Exception {
-        new OnUpdateTestRegistration<R>().accept(targetActor, this);
+    void registerActors(Class<? extends T> targetActor) throws Exception {
+        new OnUpdateTestRegistration<T, R>().accept(targetActor, this);
     }
 
 

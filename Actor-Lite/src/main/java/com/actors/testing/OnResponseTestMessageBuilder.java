@@ -2,6 +2,7 @@ package com.actors.testing;
 
 import com.actors.Actor;
 import com.actors.Message;
+import com.actors.R;
 
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -11,25 +12,29 @@ import io.reactivex.functions.Function;
  * <p>
  * Created by Ahmed Adel Ismail on 3/4/2018.
  */
-public class OnResponseTestMessageBuilder<R> extends ActorsTestMessageBuilder<R> {
+public class OnResponseTestMessageBuilder<T extends Actor, V extends Actor, R>
+        extends ActorsTestMessageBuilder<T, V, R> {
 
-    private final Class<? extends Actor> targetActor;
+    private final Class<? extends T> targetActor;
 
-    OnResponseTestMessageBuilder(ActorTestBuilder<R> testBuilder,
-                                 int id,
-                                 Class<? extends Actor> targetActor) {
+    OnResponseTestMessageBuilder(ActorTestBuilder<T, V, R> testBuilder, int id, Class<? extends T> targetActor) {
         super(testBuilder, id);
         this.targetActor = targetActor;
     }
 
-    public OnResponseTestMessageBuilder<R> withContent(Object content) {
+    public OnResponseTestMessageBuilder<T, V, R> withContent(Object content) {
         super.withContent(content);
         return this;
     }
 
-    public OnResponseTestMessageBuilder<R> withReplyToActor(Class<?> replyToActor) {
+    public OnResponseTestMessageBuilder<T, V, R> withReplyToActor(Class<?> replyToActor) {
         super.withReplyToActor(replyToActor);
         return this;
+    }
+
+    public R getReply() throws Exception {
+        return new ActorsTestAssertion<>(testBuilder, new Message(id, content, replyToActor), targetActor)
+                .getResult();
     }
 
     /**

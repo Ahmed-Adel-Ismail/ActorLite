@@ -8,6 +8,7 @@ import com.actors.ActorSystem;
 import com.actors.ActorSystemConfiguration;
 import com.actors.ActorSystemInstance;
 import com.actors.Message;
+import com.actors.R;
 import com.functional.curry.Curry;
 
 import org.javatuples.Pair;
@@ -26,21 +27,23 @@ import io.reactivex.functions.Function;
  * Created by Ahmed Adel Ismail on 3/3/2018.
  */
 @SuppressLint("RestrictedApi")
-abstract class ActorTestBuilder<R> {
+abstract class ActorTestBuilder<T extends Actor, V extends Actor, R> {
 
     final List<R> result;
     final ActorSystemTestInstance system;
-    final Class<?> validateOnActor;
+    final Class<? extends V> validateOnActor;
     final Function<Object, R> validationFunction;
     final List<Pair<Class<?>, Consumer<Message>>> mocks;
+    final List<Consumer<T>> preparations;
 
-    ActorTestBuilder(Class<?> validateOnActor, Function<Object, R> validationFunction) {
+    ActorTestBuilder(Class<? extends V> validateOnActor, Function<Object, R> validationFunction) {
         this.system = actorSystemInstance(false);
         this.result = new ArrayList<>(1);
         this.result.add(null);
         this.mocks = new LinkedList<>();
         this.validateOnActor = validateOnActor;
         this.validationFunction = validationFunction;
+        this.preparations = new LinkedList<>();
     }
 
     @NonNull
@@ -55,6 +58,19 @@ abstract class ActorTestBuilder<R> {
     }
 
     /**
+     * add a preparation function to update the Target {@link Actor} before receiving the {@link Message}
+     *
+     * @param preparation a preparation function to update the target Actor
+     * @return {@code this} instance for chaining
+     */
+    public ActorTestBuilder<T, V, R> prepare(Consumer<T> preparation) {
+        if (preparation != null) {
+            this.preparations.add(preparation);
+        }
+        return this;
+    }
+
+    /**
      * Mock an Actor, to make this Mocked Actor receive message instead of the original one,
      * and pass it's {@link Actor#onMessageReceived(Message)} as the second parameter
      *
@@ -64,8 +80,8 @@ abstract class ActorTestBuilder<R> {
      *                          second parameter is the {@link Message} received
      * @return {@code this} instance for chaining
      */
-    public ActorTestBuilder<R> mock(Class<?> actor,
-                                    BiConsumer<ActorSystemInstance, Message> onMessageReceived) {
+    public ActorTestBuilder<T, V, R> mock(Class<?> actor,
+                                          BiConsumer<ActorSystemInstance, Message> onMessageReceived) {
         mocks.add(mockActorAndOnMessageReceived(actor, onMessageReceived));
         return this;
     }
@@ -76,6 +92,6 @@ abstract class ActorTestBuilder<R> {
         return Pair.<Class<?>, Consumer<Message>>with(actor, Curry.toConsumer(onMessageReceived, system));
     }
 
-    abstract void registerActors(Class<?> targetActor) throws Exception;
+    abstract void registerActors(Class<? extends T> targetActor) throws Exception;
 
 }

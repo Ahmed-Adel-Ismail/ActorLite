@@ -11,15 +11,15 @@ import io.reactivex.functions.Function;
  * <p>
  * Created by Ahmed Adel Ismail on 3/3/2018.
  */
-public class ActorsTestRunner {
+public class ActorsTestRunner<T extends Actor> {
 
     static {
         ActorSystemGlobalConfiguration.setTestingMode(true);
     }
 
-    private final Class<? extends Actor> targetActor;
+    private final Class<? extends T> targetActor;
 
-    private ActorsTestRunner(Class<? extends Actor> targetActor) {
+    private ActorsTestRunner(Class<? extends T> targetActor) {
         this.targetActor = targetActor;
     }
 
@@ -30,8 +30,8 @@ public class ActorsTestRunner {
      * @param targetActor the {@link Actor} to be tested
      * @return the {@link ActorsTestRunner} to build and run the unit-test
      */
-    public static ActorsTestRunner testActor(Class<? extends Actor> targetActor) {
-        return new ActorsTestRunner(targetActor);
+    public static <T extends Actor> ActorsTestRunner<T> testActor(Class<? extends T> targetActor) {
+        return new ActorsTestRunner<>(targetActor);
     }
 
     /**
@@ -42,8 +42,8 @@ public class ActorsTestRunner {
      *                         reply from the target test {@link Actor}
      * @return a {@link OnReplyToAddress} to handle building the {@link OnResponseTestBuilder}
      */
-    public OnReplyToAddress whenReplyToAddress(Class<? extends Actor> onReplyToAddress) {
-        return new OnReplyToAddress(targetActor, onReplyToAddress);
+    public <V extends Actor> OnReplyToAddress<T, V> whenReplyToAddress(Class<? extends V> onReplyToAddress) {
+        return new OnReplyToAddress<>(targetActor, onReplyToAddress);
     }
 
 
@@ -55,17 +55,17 @@ public class ActorsTestRunner {
      * @param <R>                  the type of the expected result
      * @return a {@link ActorTestBuilder} that handles building a Unit test
      */
-    public <T extends Actor, R> OnUpdateTestBuilder<R> captureUpdate(Function<T, R> onTargetActorUpdated) {
+    public <R> OnUpdateTestBuilder<T, R> captureUpdate(Function<T, R> onTargetActorUpdated) {
         return new OnUpdateTestBuilder<>(targetActor, onTargetActorUpdated);
     }
 
-    public static class OnReplyToAddress {
+    public static class OnReplyToAddress<T extends Actor, V extends Actor> {
 
-        private final Class<? extends Actor> targetActor;
-        private final Class<? extends Actor> waitingForResponseActor;
+        private final Class<? extends T> targetActor;
+        private final Class<? extends V> waitingForResponseActor;
 
-        private OnReplyToAddress(Class<? extends Actor> targetActor,
-                                 Class<? extends Actor> waitingForResponseActor) {
+        private OnReplyToAddress(Class<? extends T> targetActor,
+                                 Class<? extends V> waitingForResponseActor) {
             this.targetActor = targetActor;
             this.waitingForResponseActor = waitingForResponseActor;
         }
@@ -78,7 +78,7 @@ public class ActorsTestRunner {
          * @param <R>               the type of the expected result
          * @return a {@link OnResponseTestBuilder} that handles building a Unit test
          */
-        public <R> OnResponseTestBuilder<R> captureReply(Function<Message, R> onMessageReceived) {
+        public <R> OnResponseTestBuilder<T, V, R> captureReply(Function<Message, R> onMessageReceived) {
             return new OnResponseTestBuilder<>(waitingForResponseActor, targetActor, onMessageReceived);
         }
 

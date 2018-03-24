@@ -22,6 +22,135 @@ import static org.junit.Assert.*;
 public class ActorsTestRunnerTest {
 
     @Test
+    public void prepareWithCaptureUpdateThenReturnPreparedResult() throws Exception {
+
+        int result = ActorsTestRunner.testActor(TargetActor.class)
+                .captureUpdate(new Function<TargetActor, Integer>() {
+                    @Override
+                    public Integer apply(TargetActor actor) throws Exception {
+                        return actor.id;
+                    }
+                })
+                .prepare(new Consumer<TargetActor>() {
+                    @Override
+                    public void accept(TargetActor actor) throws Exception {
+                        actor.id = 1;
+                    }
+                })
+                .sendMessage(10)
+                .getUpdate();
+
+        assertEquals(1, result);
+
+    }
+
+    @Test
+    public void prepareWithCaptureReplyThenReturnPreparedResult() throws Exception {
+
+        int result = ActorsTestRunner.testActor(TargetActor.class)
+                .whenReplyToAddress(CallbackActor.class)
+                .captureReply(new Function<Message, Integer>() {
+                    @Override
+                    public Integer apply(Message message) throws Exception {
+                        return message.getId();
+                    }
+                })
+                .prepare(new Consumer<TargetActor>() {
+                    @Override
+                    public void accept(TargetActor actor) throws Exception {
+                        actor.id = 30;
+                    }
+                })
+                .sendMessage(5)
+                .getReply();
+
+        assertEquals(30, result);
+
+    }
+
+
+    @Test
+    public void getReplyWithNoMockingThenReturnInValidCommunication() throws Exception {
+        Integer result = ActorsTestRunner.testActor(TargetActor.class)
+                .whenReplyToAddress(CallbackActor.class)
+                .captureReply(new Function<Message, Integer>() {
+                    @Override
+                    public Integer apply(Message message) throws Exception {
+                        System.out.println("MOCKED CALLBACK : " + message.getId());
+                        return message.getId();
+                    }
+                })
+                .sendMessage(1)
+                .getReply();
+
+        assertNull(result);
+    }
+
+    @Test
+    public void getReplyWithWithMockingThenReturnValidMockedCommunication() throws Exception {
+        int result = ActorsTestRunner.testActor(TargetActor.class)
+                .whenReplyToAddress(CallbackActor.class)
+                .captureReply(new Function<Message, Integer>() {
+                    @Override
+                    public Integer apply(Message message) throws Exception {
+                        System.out.println("MOCKED CALLBACK : " + message.getId());
+                        return message.getId();
+                    }
+                })
+                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
+                    @Override
+                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
+                        actorSystemInstance.send(3, TargetActor.class);
+                    }
+                })
+                .sendMessage(1)
+                .getReply();
+
+        assertEquals(3, result);
+    }
+
+
+    @Test
+    public void getUpdateWithWithNoMocksThenUpdateTheActorWithTheReceivedMessage() throws Exception {
+        int result = ActorsTestRunner.testActor(TargetActor.class)
+                .captureUpdate(new Function<TargetActor, Integer>() {
+                    @Override
+                    public Integer apply(TargetActor actor) throws Exception {
+                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+                        return actor.message.getId();
+                    }
+                })
+                .sendMessage(1)
+                .getUpdate();
+
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void getUpdateWithWithMockingThenUpdateTheActorWithTheMockedMessage() throws Exception {
+        int result = ActorsTestRunner.testActor(TargetActor.class)
+                .captureUpdate(new Function<TargetActor, Integer>() {
+                    @Override
+                    public Integer apply(TargetActor actor) throws Exception {
+                        System.out.println("UPDATED TargetActor : " + actor.message.getId());
+                        return actor.message.getId();
+                    }
+                })
+                .mock(DependencyActor.class, new BiConsumer<ActorSystemInstance, Message>() {
+                    @Override
+                    public void accept(ActorSystemInstance actorSystemInstance, Message message) throws Exception {
+                        System.out.println("MOCKED DEPENDENCY : " + message.getId());
+                        actorSystemInstance.send(3, TargetActor.class);
+                    }
+                })
+                .sendMessage(1)
+                .getUpdate();
+
+        assertEquals(3, result);
+    }
+
+    @Test
     public void captureReplyWithNoMockingThenReturnInValidCommunication() throws Exception {
         ActorsTestRunner.testActor(TargetActor.class)
                 .whenReplyToAddress(CallbackActor.class)
@@ -33,6 +162,7 @@ public class ActorsTestRunnerTest {
                     }
                 })
                 .sendMessage(1)
+                .withContent("")
                 .assertReply(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
@@ -149,6 +279,7 @@ class CallbackActor implements Actor, OnActorUnregistered {
 @Spawn({DependencyActor.class, DependencyTwoActor.class})
 class TargetActor implements Actor {
 
+    int id;
     Message message;
 
     public TargetActor() {
@@ -160,6 +291,8 @@ class TargetActor implements Actor {
         System.out.println("TargetActor : " + message.getId());
         if (message.getId() == 1) {
             ActorSystem.send(1, DependencyActor.class, DependencyTwoActor.class);
+        } else if (message.getId() == 5) {
+            ActorSystem.send(id, CallbackActor.class);
         } else {
             ActorSystem.send(message.getId(), CallbackActor.class);
         }
