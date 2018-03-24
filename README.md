@@ -523,6 +523,154 @@ public class MainActivity extends AppCompatActivity implements Actor {
 }
 ```
 
+# Unit Testing
+
+This library provides it's own Testing DSL to help you test your Actors without the need for Mocking or handling multithreading, for example suppose we have those Actors that are communicating with each other :
+
+```java
+@Spawn(DependencyActor.class)
+class TargetActor implements Actor {
+
+    private Message lastMessage;
+
+    TargetActor() {
+    }
+
+    @Override
+    public void onMessageReceived(Message message) {
+        this.lastMessage = message;
+        if (message.getId() == 1) {
+            // do some logic
+            ActorSystem.send(1, DependencyActor.class);
+        } else if (message.getId() == 2) {
+            // do some logic
+            ActorSystem.send(3, CallbackActor.class);
+        }
+
+    }
+
+    Message getLastMessage(){
+        return lastMessage;
+    }
+
+    @NonNull
+    @Override
+    public Scheduler observeOnScheduler() {
+        return Schedulers.io();
+    }
+}
+
+
+class DependencyActor implements Actor {
+
+    public DependencyActor() {
+    }
+
+    @Override
+    public void onMessageReceived(Message message) {
+        if (message.getId() == 1) {
+            // do some logic
+            ActorSystem.send(2, TargetActor.class);
+        }
+    }
+
+    @NonNull
+    @Override
+    public Scheduler observeOnScheduler() {
+        return Schedulers.computation();
+    }
+}
+```
+
+Suppose that the <b>CallbackActor</b> is sending messages to <b>TargetActor</b>, which communicates with <b>DependencyActor</b>, and retrieves results from it then replies back to the <b>CallbackActor</b>
+
+so we can make unit-tests for the <b>TargetActor</b> in isolation from the external world with just few lines
+
+<b>1- Let us check if the lastMessage is updated when we send a message to this Actor: </b>
+
+```java
+@Test
+public void sendMessageToTargetThenUpdateLastMessageValue() throws Exception {
+    Message lastMessage = ActorsTestRunner.testActor(TargetActor.class)
+            .captureUpdate(TargetActor::getLastMessage)
+            .sendMessage(1)
+            .withContent("one")
+            .getUpdate();
+
+    assertEquals("one",lastMessage.getContent());
+}
+```
+
+with those few lines, the <b>ActorsTestRunner</b> handled mocking all the dependencies for us, also it handled multithreading as well (remember this Actor is supposed to run on a background thread)
+
+<b>2- Let us check if the TargetActor will send the message with the id "1" to the DependencyActor and handle it's response message as expected: </b>
+
+```java
+@Test
+    public void sendMessageWithIdOneToDependencyActorThenHandleItsResponse()
+            throws Exception {
+
+        Message lastMessage = ActorsTestRunner.testActor(TargetActor.class)
+                .captureUpdate(TargetActor::getLastMessage)
+                .mock(DependencyActor.class, this::handleMessageWithIdOne)
+                .sendMessage(1)
+                .getUpdate();
+
+        assertEquals(100, lastMessage.getId());
+    }
+
+    private void handleMessageWithIdOne(ActorSystemInstance actorSystem, Message message) {
+        if (message.getId() == 1) {
+            actorSystem.send(new Message(100, "fake-message"), TargetActor.class);
+        }
+    }
+```
+
+in the previous test, we made sure that the <b>TargetActor</b> behaves as expected and it delivers the message to the <b>DependencyActor</b>, we mocked the behavior of the <b>DependencyActor</b> in those lines :
+
+```java
+    .mock(DependencyActor.class, this::handleMessageWithIdOne)
+
+    ...
+
+private void handleMessageWithIdOne(ActorSystemInstance actorSystem,Message message) {
+        if (message.getId() == 1) {
+            actorSystem.send(new Message(100, "fake-message"), TargetActor.class);
+        }
+    }
+
+```
+
+This is how ActorsTestRunner guarantees isolation of the Actor under testing, it does not create any dependencies for your Actor under test, so if you want to create a dependency, you need to mock it, and it will replaces the Mocks with the real dependencies
+
+<b>3- After we made sure that the TargetActor sends a message to it's dependency properly, in the next example, we will test that our TargetActor replies to the CallbackActor properly:</b>
+
+```java
+ @Test
+public void sendMessageWithIdTwoThenReceiveMessageWithIdThreeOnCallbackActor()
+        throws Exception {
+
+    int messageId = ActorsTestRunner.testActor(TargetActor.class)
+            .whenReplyToAddress(CallbackActor.class)
+            .captureReply(Message::getId)
+            .sendMessage(2)
+            .getReply();
+
+    assertEquals(3,messageId);
+
+}
+```
+
+In this last test, we made sure that when our <b>TargetActor</b> receives a Message with the id "2", it will send another Message to the <b>CallbackActor</b> with the id "3"
+
+Notice that we did not need to mock the <b>CallbackActor</b> to be able to know it it received the message, <b>ActorsTestRunner</b> handles the mocking process for us
+
+With <b>ActorsTestRunner</b>'s DSL, you can hit 90% + test coverage with just few lines, by the way, the Unit test for this <b>TargetActor</b> covers 100% with only 20 kines, no Traditional Mocking or Test-doubles, no Multithreading handling, just 5 or 6 lines per Unit-Test and that's all
+
+Notice also that you did not need to design your original code for test-ability, as the <b>ActorsTestRunner</b> handles this for you, it switches the production environment with a Testing Environment, and makes a special environment for every Unit-Test, which makes it easy to run the Unit-Tests in Parallel as well
+
+There are many other features provided by <b>ActorsTestRunner</b> to make Unit-Testing a piece of cake, I did not mention every thing here
+
 # Gradle Dependencies
 
 Step 1. Add the JitPack repository to your build file
