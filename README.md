@@ -563,7 +563,7 @@ class TargetActor implements Actor {
 
 class DependencyActor implements Actor {
 
-    public DependencyActor() {
+    DependencyActor() {
     }
 
     @Override
@@ -607,31 +607,31 @@ with those few lines, the <b>ActorsTestRunner</b> handled mocking all the depend
 
 ```java
 @Test
-    public void sendMessageWithIdOneToDependencyActorThenHandleItsResponse()
-            throws Exception {
+public void sendMessageWithIdOneToDependencyActorThenHandleItsResponse()
+        throws Exception {
 
-        Message lastMessage = ActorsTestRunner.testActor(TargetActor.class)
-                .captureUpdate(TargetActor::getLastMessage)
-                .mock(DependencyActor.class, this::handleMessageWithIdOne)
-                .sendMessage(1)
-                .getUpdate();
+    Message lastMessage = ActorsTestRunner.testActor(TargetActor.class)
+            .captureUpdate(TargetActor::getLastMessage)
+            .mock(DependencyActor.class, this::handleMessageWithIdOne)
+            .sendMessage(1)
+            .getUpdate();
 
-        assertEquals(100, lastMessage.getId());
+    assertEquals(100, lastMessage.getId());
+}
+
+private void handleMessageWithIdOne(ActorSystemInstance actorSystem, Message message) {
+    if (message.getId() == 1) {
+        actorSystem.send(new Message(100, "fake-message"), TargetActor.class);
     }
-
-    private void handleMessageWithIdOne(ActorSystemInstance actorSystem, Message message) {
-        if (message.getId() == 1) {
-            actorSystem.send(new Message(100, "fake-message"), TargetActor.class);
-        }
-    }
+}
 ```
 
 in the previous test, we made sure that the <b>TargetActor</b> behaves as expected and it delivers the message to the <b>DependencyActor</b>, we mocked the behavior of the <b>DependencyActor</b> in those lines :
 
 ```java
-    .mock(DependencyActor.class, this::handleMessageWithIdOne)
+.mock(DependencyActor.class, this::handleMessageWithIdOne)
 
-    ...
+...
 
 private void handleMessageWithIdOne(ActorSystemInstance actorSystem,Message message) {
         if (message.getId() == 1) {
@@ -646,7 +646,7 @@ This is how ActorsTestRunner guarantees isolation of the Actor under testing, it
 <b>3- After we made sure that the TargetActor sends a message to it's dependency properly, in the next example, we will test that our TargetActor replies to the CallbackActor properly:</b>
 
 ```java
- @Test
+@Test
 public void sendMessageWithIdTwoThenReceiveMessageWithIdThreeOnCallbackActor()
         throws Exception {
 
