@@ -317,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements Actor {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         model = ViewModelProviders.of(this).get(Model.class);
-        ActorSystem.register(model);
     }
 
     @Override
@@ -339,15 +338,6 @@ public class MainActivity extends AppCompatActivity implements Actor {
         return AndroidSchedulers.mainThread();
     }
 
-    @Override
-    protected void onDestroy() {
-        ActorSystem.unregister(model);
-        if(isFinishing()){
-            // cancel scheduled messages
-            ActorScheduler.cancel(model.getClass());
-        }
-        super.onDestroy();
-    }
 }
 ```
 
@@ -355,9 +345,13 @@ And Our Model will request from the ActorSystem to spawn a Repository Actor for 
 
 ```java
 @Spawn(Repository.class)
-public class Model extends ViewModel implements Actor, OnActorUnregistered {
+public class Model extends ViewModel implements Actor {
 
     public static final int MSG_PING = 1;
+
+    public Model(){
+        ActorSystem.register(this);
+    }
 
     @Override
     public void onMessageReceived(Message message) {
@@ -374,8 +368,9 @@ public class Model extends ViewModel implements Actor, OnActorUnregistered {
     }
 
     @Override
-    public void onUnregister() {
-        // clear the state of this Actor in this method
+    public void onCleared() {
+        ActorSystem.unregister(this);
+        ActorScheduler.cancel(getClass());
     }
 }
 ```
@@ -384,7 +379,7 @@ you can pass to the @Spawn annotation a fully qualified class name (which implem
 
 ```java
 @Spawn(actorClasses = "com.actors.actorlite.Repository")
-public class Model extends ViewModel implements Actor, OnActorUnregistered {
+public class Model extends ViewModel implements Actor {
 ...
 }
 ```
@@ -477,16 +472,16 @@ public class DatabaseDataSource implements Actor, OnActorUnregistered {
 
  Notice that if you Spawn an actor multiple times in the same scope, only one instance will be created and running, and it will stay registered until all the actors depending on it are unregistered
 
- You can Spawn all the desired Actors when you start your Activity as follows :
+ You can Spawn all the desired Actors when you start your Model as follows :
 
  ```Java
  @Spawn({Repository.class, ServerDataSource.class, DatabaseDataSource.class})
- public class MainActivity extends AppCompatActivity implements Actor {
+ public class Model extends ViewModel implements Actor {
     ...
  }
  ```
 
-So all those Actors will be available as long as the Activity is registered
+So all those Actors will be available as long as the Model is registered (remember that the architecture components <b>ViewModel</b> class will survive the Activity's rotation, so the <b>Model</b> will be registered as long as the Activity is not totally destroyed)
 
 
 # Tips
