@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.actors.actorlite"
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -40,5 +40,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation project(':Actor-Lite')
 //    implementation 'com.github.Ahmed-Adel-Ismail:ActorLite:0.0.10'
-    implementation 'com.github.Ahmed-Adel-Ismail:J-Chain:1.0.0'
+    implementation 'com.github.Ahmed-Adel-Ismail:J-Chain:2.0.0'
 }

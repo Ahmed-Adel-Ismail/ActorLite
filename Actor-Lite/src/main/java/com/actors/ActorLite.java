@@ -3,11 +3,6 @@ package com.actors;
 import android.app.Application;
 import android.support.annotation.NonNull;
 
-import com.chaining.Chain;
-
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 
 /**
  * a class that integrates the ActorLite library with the passed Application
